@@ -11,11 +11,11 @@ const scenes: Phaser.Scene[] = [];
 //if (devMode) {
 //  scenes = [Main];
 //} else {
-  scenes.push(new RadmarsScreen());
+scenes.push(new RadmarsScreen());
 //}
 
 new Phaser.Game(
-  Object.assign(config, {
-    scene: scenes,
-  })
+    Object.assign(config, {
+        scene: scenes,
+    })
 );

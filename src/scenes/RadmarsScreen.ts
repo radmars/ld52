@@ -6,7 +6,7 @@ export default class RadmarsScreen extends Phaser.Scene {
         super('RadmarsScreen');
     }
 
-    preload() {
+    preload(): void {
         this.load.image('bg', 'assets/intro/intro_bg.png');
         this.load.image('mars', 'assets/intro/intro_mars.png');
 
@@ -16,7 +16,7 @@ export default class RadmarsScreen extends Phaser.Scene {
         this.load.audio('radmarslogo', ['assets/intro/radmarslogo.m4a', 'assets/intro/radmarslogo.ogg']);
     }
 
-    create() {
+    create(): void {
         this.anims.create({
             key: 'glassesIdle',
             frames: [{ key: 'glasses', frame: 0 }],
@@ -35,7 +35,7 @@ export default class RadmarsScreen extends Phaser.Scene {
             frames: this.anims.generateFrameNumbers('radmars', {}),
             frameRate: 10,
             repeat: 3,
-        })
+        });
 
         this.sound.play('radmarslogo', { volume: 0.5 });
 
@@ -57,7 +57,7 @@ export default class RadmarsScreen extends Phaser.Scene {
                 radmarsGlasses.chain(['glassesIdle']);
             },
         });
-        radmarsGlasses.on(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + 'glassesFlash', () => {
+        radmarsGlasses.on(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY as string + 'glassesFlash', () => {
             // I tried to use playAfterDelay instead, but the delay was inherited by the chained animation.
             this.time.addEvent({
                 delay: 500,
@@ -67,15 +67,15 @@ export default class RadmarsScreen extends Phaser.Scene {
                 },
             });
         });
-        radmarsText.on(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + 'textFlash', () => {
+        radmarsText.on(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY as string+ 'textFlash', () => {
             this.time.addEvent({
                 delay: 2000,
                 callback: () => {
                     this.cameras.main.fadeOut(1000);
                 }
-            })
+            });
         });
-        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE as string, () => {
             this.scene.start('TileScreen');
         });
 

@@ -1,24 +1,45 @@
 import { Tilemaps } from "phaser";
 
+interface PlantParams {
+    indexes: number[];
+    timer: number;
+}
+
 class Plant {
     private indexes: number[];
-    private currentIndex: number; 
+    private currentIndex: number;
+    private timer: number;
+    private timerIncrement: number;
 
-    constructor({indexes}: {indexes: number[]}) {
+    constructor({ indexes, timer }: PlantParams) {
         this.indexes = indexes;
         this.currentIndex = 0;
+        this.timer = timer;
+        this.timerIncrement = timer;
     }
 
     current() {
         return this.indexes[this.currentIndex];
     }
 
-    evolve() {
-        if(this.currentIndex >= this.indexes.length) {
-            this.currentIndex = 0;
-        }
-        else {
-            this.currentIndex++;
+    resetTimer() {
+        this.timer = this.timerIncrement;
+    }
+
+    /**
+     * Returns true if the plant evolved.
+     */
+    evolve(dt: number) {
+        this.timer -= dt;
+        if (this.timer <= 0) {
+            this.resetTimer();
+            if (this.currentIndex >= this.indexes.length) {
+                this.currentIndex = 0;
+            }
+            else {
+                this.currentIndex++;
+            }
+            return true;
         }
     }
 
@@ -27,20 +48,47 @@ class Plant {
     }
 }
 
-const green = new Plant({ indexes: [0, 1, 2, 3]});
-const pink = new Plant({ indexes: [10, 11, 12, 13]});
+const green = new Plant({ timer: 2000, indexes: [0, 1, 2, 3] });
+const pink = new Plant({ timer: 1000, indexes: [10, 11, 12, 13] });
 
 function make_map(): Plant[][] {
-    return [
-        // columns!!!
-        [green, green, green],
-        [pink, pink, pink],
-        [green, pink, green],
-    ];
+    let map = `
+        ggggggggggppppppppppgpgpgpgpgppppppggggg
+        ggggggggggppppppppppppppppppppgggggggggg
+        ggggggggggpppppppppgggggggggggpppppppppp
+        pgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpg
+        pppgggpppgggpppgggpppgggpppgggpppgggpppg
+        gggggggggggggggggggggggggggggggggggggggg
+        pppppppppppppppppppppppppppppppppppppppp
+        pppppppppppppppppppppppppppppppppppppppp
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        pppppppppppppppppppppppppppppppppppppppp
+        pppppppppppppppppppppppppppppppppppppppp
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        pppppppppppppppppppppppppppppppppppppppp
+        pppppppppppppppppppppppppppppppppppppppp
+        gggggggggggggggggggggggggggggggggggggggg
+    `;
+    map = map.replaceAll(/^\s*\n/gm, '')
+        .replaceAll(/^\s*$/gm, '');
+    const map_rows = map.split(/\n/);
+    return map_rows.filter(row => row.length > 0).map(row => {
+        row = row.replaceAll(/\s*/g, '');
+        return row.split('').map(cell => {
+            if (cell == 'g') {
+                return green.clone();
+            }
+            else if (cell == 'p') {
+                return pink.clone();
+            }
+            throw new Error(`Unknown cell: "${cell}"`);
+        });
+    });
 }
 
 export class TileScreen extends Phaser.Scene {
-    evolutionTimer?: Phaser.Time.TimerEvent;
     plantData: Plant[][];
     map?: Tilemaps.Tilemap;
 
@@ -56,8 +104,8 @@ export class TileScreen extends Phaser.Scene {
     create() {
         this.map = this.make.tilemap({
             key: 'map',
-            width: this.plantData.length,
-            height: this.plantData[0].length,
+            width: this.plantData[0].length,
+            height: this.plantData.length,
             tileWidth: 32,
             tileHeight: 32,
         });
@@ -67,23 +115,31 @@ export class TileScreen extends Phaser.Scene {
         const plants = this.map.createBlankLayer('plants', tileset);
         plants.fill(0, 0, 0, this.map.width, this.map.height);
 
-        this.plantData.forEach((column, x) => {
-            column.forEach((cell, y) => {
-                plants.getTileAt(x, y).index = cell.current();
-            })
-        });
-
-        this.evolutionTimer = this.time.delayedCall(2000, this.evolve, [tileset, plants], this);
+        this.updatePlantTiles();
     }
 
-    evolve(tileset: Tilemaps.Tileset, plants: Tilemaps.TilemapLayer) {
+    updatePlantTiles() {
         if(this.map) {
-            console.log("Evolution");
-            const plant = this.plantData[1][1];
-            plant.evolve();
-            this.map.getTileAt(1, 1).index = plant.current();
+            const layer = this.map.getLayerIndexByName("plants");
+            const map = this.map;
+            this.plantData.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    map.getTileAt(x, y, undefined, layer).index = cell.current();
+                })
+            });
+        }
+    }
 
-            this.evolutionTimer = this.time.delayedCall(2000, this.evolve, [tileset, plants], this);
+    update(time: number, delta: number): void {
+        let updated = false;
+        this.plantData.forEach(row => {
+            row.forEach(plant => {
+                updated = plant.evolve(delta) || updated;
+            });
+        });
+
+        if(updated) {
+            this.updatePlantTiles();
         }
     }
 }

@@ -1,161 +1,7 @@
 import { Tilemaps } from "phaser";
 import { WINDOW_CENTER } from "../constants";
-
-const TILE_SIZE = 32;
-
-type Frame = number;
-
-interface BarnTile {
-    type: 'barn';
-    object: Barn;
-}
-
-class Barn {
-    current(): Frame {
-        return 20;
-    }
-}
-
-function new_barn_tile(barn: Barn): BarnTile {
-    return {
-        type: 'barn',
-        object: barn,
-    };
-}
-
-interface PlantTile {
-    type: 'plant';
-    object: Plant;
-}
-
-function new_plant_tile(p: Plant): PlantTile {
-    return {
-        type: 'plant',
-        object: p,
-    };
-}
-
-type Tile = PlantTile | BarnTile;
-
-interface PlantParams {
-    indexes: number[];
-    timer: number;
-}
-
-class Plant {
-    private indexes: Frame[];
-    private currentIndex: number;
-    private currentFrame: Frame;
-    private timer: number;
-    private timerIncrement: number;
-
-    constructor({ indexes, timer }: PlantParams) {
-        const currentFrame = indexes[0];
-
-        if (currentFrame == undefined) {
-            throw new Error("Must have at least one frame indexed");
-        }
-
-        this.indexes = indexes;
-        this.currentIndex = 0;
-        this.timer = timer;
-        this.timerIncrement = timer;
-        this.currentFrame = currentFrame;
-    }
-
-    current(): number {
-        return this.currentFrame;
-    }
-
-    resetTimer(): void {
-        this.timer = this.timerIncrement;
-    }
-
-    /**
-     * Returns true if the plant evolved.
-     */
-    evolve(dt: number): boolean {
-        this.timer -= dt;
-        if (this.timer <= 0) {
-            this.resetTimer();
-            if (this.currentIndex >= this.indexes.length) {
-                this.currentIndex = 0;
-            }
-            else {
-                this.currentIndex++;
-            }
-
-            const currentFrame = this.indexes[this.currentIndex];
-            if(currentFrame != undefined) {
-                this.currentFrame = currentFrame;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    clone(): Plant {
-        const proto = Object.getPrototypeOf(this) as object;
-        return Object.assign(Object.create(proto), this) as Plant;
-    }
-}
-
-const green = new Plant({ timer: 2000, indexes: [0, 1, 2, 3] });
-const pink = new Plant({ timer: 1000, indexes: [10, 11, 12, 13] });
-
-function make_map(): Tile[][] {
-    let map = `
-        ggggggggggppppppppppgpgpgpgpgppppppggggg
-        ggggggggggppppppppppppppppppppgggggggggg
-        ggggggggggpppppppppgggggggggggpppppppppp
-        pgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpgpg
-        pppgggpppgggpppgggpppgggpppgggpppgggpppg
-        gggggggggggggggggggggggggggggggggggggggg
-        pppppppppppppppppppppppppppppppppppppppp
-        pppppppppppppppppppppppppppppppppppppppp
-        pppppppppppppppppppppppppppppppppppppppp
-        pppppppppppppppppppppppppppppppppppppppp
-        bppppppppppppppppppppppppppppppppppppppp
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        pppppppppppppppppppppppppppppppppppppppp
-        pppppppppppppppppppppppppppppppppppppppp
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        pppppppppppppppppppppppppppppppppppppppp
-        pppppppppppppppppppppppppppppppppppppppp
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-        gggggggggggggggggggggggggggggggggggggggg
-    `;
-    map = map.replaceAll(/^\s*\n/gm, '')
-        .replaceAll(/^\s*$/gm, '');
-    const map_rows = map.split(/\n/);
-    return map_rows.filter(row => row.length > 0).map(row => {
-        row = row.replaceAll(/\s*/g, '');
-        return row.split('').map((cell): Tile => {
-            if (cell == 'g') {
-                return new_plant_tile(green.clone());
-            }
-            else if (cell == 'p') {
-                return new_plant_tile(pink.clone());
-            }
-            else if (cell == 'b') {
-                return new_barn_tile(new Barn());
-            }
-            throw new Error(`Unknown cell: "${cell}"`);
-        });
-    });
-}
+import { Tile, TILE_SIZE } from '../map/tiles';
+import { build } from '../map/builder';
 
 export class TileScreen extends Phaser.Scene {
     tiles: Tile[][];
@@ -164,7 +10,7 @@ export class TileScreen extends Phaser.Scene {
 
     constructor() {
         super('TileScreen');
-        this.tiles = make_map();
+        this.tiles = build();
     }
 
     preload(): void {
@@ -214,6 +60,10 @@ export class TileScreen extends Phaser.Scene {
         this.input.keyboard.on('keydown-UP', () => {
             harvester.y -= 3;
             console.log('right up!');
+        });
+
+        this.input.keyboard.on('keydown-SPACE', () => {
+            this.cameras.main.shake();
         });
     }
 

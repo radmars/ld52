@@ -1,0 +1,98 @@
+export const TILE_SIZE = 32;
+
+export type Frame = number;
+
+export interface BarnTile {
+    type: 'barn';
+    object: Barn;
+}
+
+export class Barn {
+    current(): Frame {
+        return 20;
+    }
+}
+
+export function new_barn_tile(barn: Barn): BarnTile {
+    return {
+        type: 'barn',
+        object: barn,
+    };
+}
+
+export interface PlantTile {
+    type: 'plant';
+    object: Plant;
+}
+
+export function new_plant_tile(p: Plant): PlantTile {
+    return {
+        type: 'plant',
+        object: p,
+    };
+}
+
+export type Tile = PlantTile | BarnTile;
+
+export interface PlantParams {
+    indexes: number[];
+    timer: number;
+}
+
+export class Plant {
+    private indexes: Frame[];
+    private currentIndex: number;
+    private currentFrame: Frame;
+    private timer: number;
+    private timerIncrement: number;
+
+    constructor({ indexes, timer }: PlantParams) {
+        const currentFrame = indexes[0];
+
+        if (currentFrame == undefined) {
+            throw new Error("Must have at least one frame indexed");
+        }
+
+        this.indexes = indexes;
+        this.currentIndex = 0;
+        this.timer = timer;
+        this.timerIncrement = timer;
+        this.currentFrame = currentFrame;
+    }
+
+    current(): number {
+        return this.currentFrame;
+    }
+
+    resetTimer(): void {
+        this.timer = this.timerIncrement;
+    }
+
+    /**
+     * Returns true if the plant evolved.
+     */
+    evolve(dt: number): boolean {
+        this.timer -= dt;
+        if (this.timer <= 0) {
+            this.resetTimer();
+            if (this.currentIndex >= this.indexes.length) {
+                this.currentIndex = 0;
+            }
+            else {
+                this.currentIndex++;
+            }
+
+            const currentFrame = this.indexes[this.currentIndex];
+            if(currentFrame != undefined) {
+                this.currentFrame = currentFrame;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    clone(): Plant {
+        const proto = Object.getPrototypeOf(this) as object;
+        return Object.assign(Object.create(proto), this) as Plant;
+    }
+}

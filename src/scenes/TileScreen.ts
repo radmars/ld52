@@ -2,10 +2,22 @@ import { Tilemaps } from "phaser";
 
 type Frame = number;
 
+interface BarnTile {
+    type: 'barn';
+    object: Barn;
+}
+
 class Barn {
     current(): Frame {
         return 20;
     }
+}
+
+function new_barn_tile(barn: Barn): BarnTile {
+    return {
+        type: 'barn',
+        object: barn,
+    };
 }
 
 interface PlantTile {
@@ -20,8 +32,7 @@ function new_plant_tile(p: Plant): PlantTile {
     };
 }
 
-type Tile = PlantTile
-    | { type: 'barn', object: Barn };
+type Tile = PlantTile | BarnTile;
 
 interface PlantParams {
     indexes: number[];
@@ -98,7 +109,7 @@ function make_map(): Tile[][] {
         pppgggpppgggpppgggpppgggpppgggpppgggpppg
         gggggggggggggggggggggggggggggggggggggggg
         pppppppppppppppppppppppppppppppppppppppp
-        pppppppppppppppppppppppppppppppppppppppp
+        bppppppppppppppppppppppppppppppppppppppp
         gggggggggggggggggggggggggggggggggggggggg
         gggggggggggggggggggggggggggggggggggggggg
         pppppppppppppppppppppppppppppppppppppppp
@@ -120,6 +131,9 @@ function make_map(): Tile[][] {
             }
             else if (cell == 'p') {
                 return new_plant_tile(pink.clone());
+            }
+            else if (cell == 'b') {
+                return new_barn_tile(new Barn());
             }
             throw new Error(`Unknown cell: "${cell}"`);
         });

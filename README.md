@@ -9,3 +9,5 @@ Phaser w/ TypeScript template used: https://github.com/geocine/phaser3-rollup-ty
 -   To lint the project, run `yarn eslint .`
 
 To skip the intros and disable music, append '?dev=true' to the game's URL.
+
+fuck you

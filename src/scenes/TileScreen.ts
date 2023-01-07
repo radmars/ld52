@@ -1,4 +1,7 @@
 import { Tilemaps } from "phaser";
+import { WINDOW_CENTER } from "../constants";
+
+const TILE_SIZE = 32;
 
 type Frame = number;
 
@@ -109,6 +112,9 @@ function make_map(): Tile[][] {
         pppgggpppgggpppgggpppgggpppgggpppgggpppg
         gggggggggggggggggggggggggggggggggggggggg
         pppppppppppppppppppppppppppppppppppppppp
+        pppppppppppppppppppppppppppppppppppppppp
+        pppppppppppppppppppppppppppppppppppppppp
+        pppppppppppppppppppppppppppppppppppppppp
         bppppppppppppppppppppppppppppppppppppppp
         gggggggggggggggggggggggggggggggggggggggg
         gggggggggggggggggggggggggggggggggggggggg
@@ -118,6 +124,17 @@ function make_map(): Tile[][] {
         gggggggggggggggggggggggggggggggggggggggg
         pppppppppppppppppppppppppppppppppppppppp
         pppppppppppppppppppppppppppppppppppppppp
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
+        gggggggggggggggggggggggggggggggggggggggg
         gggggggggggggggggggggggggggggggggggggggg
     `;
     map = map.replaceAll(/^\s*\n/gm, '')
@@ -143,6 +160,7 @@ function make_map(): Tile[][] {
 export class TileScreen extends Phaser.Scene {
     tiles: Tile[][];
     map?: Tilemaps.Tilemap;
+    harvester?: Phaser.GameObjects.Image;
 
     constructor() {
         super('TileScreen');
@@ -151,6 +169,7 @@ export class TileScreen extends Phaser.Scene {
 
     preload(): void {
         this.load.image('tiles', 'assets/tiles/tiles.png');
+        this.load.image('einstein', 'assets/harvester.png');
     }
 
     create(): void {
@@ -167,12 +186,35 @@ export class TileScreen extends Phaser.Scene {
             tileHeight: 32,
         });
 
+        const harvester = this.add.image(WINDOW_CENTER.x, WINDOW_CENTER.y, 'harvester');
+        this.harvester = harvester;
+
         const tileset = this.map.addTilesetImage('tiles', undefined, 32, 32);
 
         const plants = this.map.createBlankLayer('plants', tileset);
         plants.fill(0, 0, 0, this.map.width, this.map.height);
 
+        this.cameras.main.setBounds(0, 0, TILE_SIZE * this.map.width, TILE_SIZE * this.map.height);
+        // Set Deadzone for harvester?
+        this.cameras.main.startFollow(this.harvester);
+
         this.updateTiles();
+        this.input.keyboard.on('keydown-RIGHT', () => {
+            harvester.x += 3;
+        });
+
+        this.input.keyboard.on('keydown-LEFT', () => {
+            harvester.x -= 3;
+        });
+
+        this.input.keyboard.on('keydown-DOWN', () => {
+            harvester.y += 3;
+        });
+
+        this.input.keyboard.on('keydown-UP', () => {
+            harvester.y -= 3;
+            console.log('right up!');
+        });
     }
 
     updateTiles(): void {
@@ -181,7 +223,6 @@ export class TileScreen extends Phaser.Scene {
                 .tilemapLayer;
             this.tiles.forEach((row, y) => {
                 row.forEach((tile, x) => {
-                    console.log("D");
                     layer.getTileAt(x, y).index = tile.object.current();
                 });
             });

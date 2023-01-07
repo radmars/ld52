@@ -76,7 +76,7 @@ export default class RadmarsScreen extends Phaser.Scene {
             })
         });
         this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-            this.scene.start('TitleScreen');
+            this.scene.start('TileScreen');
         });
 
         this.cameras.main.fadeIn(1000);

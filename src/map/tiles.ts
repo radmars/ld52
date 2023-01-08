@@ -9,7 +9,7 @@ export interface BarnTile {
 
 export class Barn {
     current(): Frame {
-        return 20;
+        return 6;
     }
 }
 
@@ -43,7 +43,7 @@ export class Plant {
     private indexes: Frame[];
     private currentIndex: number;
     private currentFrame: Frame;
-    timer: number | null;
+    private timer: number | null;
     private timerIncrement: number;
 
     constructor({ indexes, timer }: PlantParams) {
@@ -58,6 +58,11 @@ export class Plant {
         this.timer = timer;
         this.timerIncrement = timer;
         this.currentFrame = currentFrame;
+    }
+
+    updateTimer(increment: number): void {
+        this.timer = increment;
+        this.timerIncrement = increment;
     }
 
     current(): number {

@@ -7,7 +7,7 @@ type TileDefinitions = Record<string, () => Tile>;
 const map_tiles: TileDefinitions = {
     g: (): Tile => {
         const tile = new_plant_tile(meat.clone());
-        tile.object.timer = Math.random() * 2000 + 500;
+        tile.object.updateTimer(Math.random() * 20000 + 4000);
         return tile;
     },
     b: (): Tile => {
@@ -23,8 +23,8 @@ export function build(): Tile[][] {
         ggggggggggggggggggggggggggggggggggggggggg
         ggggggggggggggggggggggggggggggggggggggggg
         ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
+        bbggggggggggggggggggggggggggggggggggggggg
+        bbggggggggggggggggggggggggggggggggggggggg
         ggggggggggggggggggggggggggggggggggggggggg
         ggggggggggggggggggggggggggggggggggggggggg
         ggggggggggggggggggggggggggggggggggggggggg

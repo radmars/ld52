@@ -5,6 +5,7 @@ export default {
     type: Phaser.AUTO,
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
+    pixelArt: true,
     physics: {
         default: 'arcade',
     },

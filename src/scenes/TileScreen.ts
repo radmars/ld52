@@ -24,7 +24,6 @@ export class TileScreen extends Phaser.Scene {
         if (!first_row) {
             throw new Error("Must have failed to parse map!");
         }
-
         this.map = this.make.tilemap({
             key: 'map',
             width: first_row.length,
@@ -32,9 +31,6 @@ export class TileScreen extends Phaser.Scene {
             tileWidth: 32,
             tileHeight: 32,
         });
-
-        const harvester = this.add.image(WINDOW_CENTER.x, WINDOW_CENTER.y, 'harvester');
-        this.harvester = harvester;
 
         const ground_tileset = this.map.addTilesetImage('ground', undefined, 96, 96);
         const plant_tileset = this.map.addTilesetImage('plants', undefined, 96, 96);
@@ -45,11 +41,14 @@ export class TileScreen extends Phaser.Scene {
         const plants = this.map.createBlankLayer('plants', plant_tileset);
         plants.fill(0, 0, 0, this.map.width, this.map.height);
 
+        this.updateTiles();
+
+        const harvester = this.add.image(WINDOW_CENTER.x, WINDOW_CENTER.y, 'harvester', 0);
+        this.harvester = harvester;
         this.cameras.main.setBounds(0, 0, TILE_SIZE * this.map.width, TILE_SIZE * this.map.height);
-        // Set Deadzone for harvester?
+        // TODO: Set Deadzone for harvester?
         this.cameras.main.startFollow(this.harvester);
 
-        this.updateTiles();
         this.input.keyboard.on('keydown-RIGHT', () => {
             harvester.x += 3;
         });

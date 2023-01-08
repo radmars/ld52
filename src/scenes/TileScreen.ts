@@ -1,12 +1,13 @@
 import { GameObjects, Tilemaps } from "phaser";
 import { WINDOW_CENTER } from "../constants";
-import { Tile, TILE_SIZE } from '../map/tiles';
+import { BarnTile, PlantTile, Tile, TILE_SIZE } from '../map/tiles';
 import { build } from '../map/builder';
+import { Harvester, make_harvester, update_harvester_position } from "../harvester";
 
 interface GameState {
     tiles: Tile[][];
     map: Tilemaps.Tilemap;
-    harvester: Phaser.GameObjects.Image;
+    harvester: Harvester,
     hauling_text: GameObjects.Text;
     hauling: number;
     sold: number;
@@ -55,10 +56,11 @@ export class TileScreen extends Phaser.Scene {
         const plants = map.createBlankLayer('plants', plant_tileset);
         plants.fill(0, 0, 0, map.width, map.height);
 
-        const harvester = this.add.image(WINDOW_CENTER.x, WINDOW_CENTER.y, 'harvester', 0);
-        this.cameras.main.setBounds(0, 0, TILE_SIZE * map.width, TILE_SIZE * map.height);
+        const harvester = make_harvester(map, WINDOW_CENTER.x, WINDOW_CENTER.y, this.add);
+
         // TODO: Set Deadzone for harvester?
-        this.cameras.main.startFollow(harvester);
+        this.cameras.main.setBounds(0, 0, TILE_SIZE * map.width, TILE_SIZE * map.height);
+        this.cameras.main.startFollow(harvester.sprite);
 
         const hauling_text = this.add.text(0, 0, '', {
             font: '16px Rock Salt',
@@ -66,6 +68,7 @@ export class TileScreen extends Phaser.Scene {
             stroke: '#000000',
             strokeThickness: 4,
         });
+        hauling_text.setScrollFactor(0);
 
         const sold_text = this.add.text(0, 36, '', {
             font: '16px Rock Salt',
@@ -73,8 +76,8 @@ export class TileScreen extends Phaser.Scene {
             stroke: '#000000',
             strokeThickness: 4,
         });
+        sold_text.setScrollFactor(0);
 
-        hauling_text.setScrollFactor(0);
 
         const game_state: GameState = {
             harvester,
@@ -84,10 +87,10 @@ export class TileScreen extends Phaser.Scene {
             hauling: 0,
             sold: 0,
             sold_text,
-            up_key:this.input.keyboard.addKey('UP'),
-            down_key:this.input.keyboard.addKey('DOWN'),
-            left_key:this.input.keyboard.addKey('LEFT'),
-            right_key:this.input.keyboard.addKey('RIGHT'),
+            up_key: this.input.keyboard.addKey('UP'),
+            down_key: this.input.keyboard.addKey('DOWN'),
+            left_key: this.input.keyboard.addKey('LEFT'),
+            right_key: this.input.keyboard.addKey('RIGHT'),
         };
 
         this.game_state = game_state;
@@ -95,13 +98,8 @@ export class TileScreen extends Phaser.Scene {
         this.updateTiles();
         this.updateHUD();
 
-        
-        this.input.keyboard.on('keydown-SPACE', () => {
-            this.onTouchPlant();
-        });
-
         this.input.keyboard.on('keydown-B', () => {
-            this.onTouchBarn();
+            this.onTouchBarn(game_state);
         });
     }
 
@@ -128,6 +126,7 @@ export class TileScreen extends Phaser.Scene {
         super.update(time, delta);
 
         if (this.game_state) {
+            const state = this.game_state;
             let updated = false;
             for (const row of this.game_state.tiles) {
                 for (const tile of row) {
@@ -139,20 +138,31 @@ export class TileScreen extends Phaser.Scene {
                 }
             }
 
-            if(this.game_state.right_key.isDown) {
-                this.game_state.harvester.x += 3;
+            if (state.right_key.isDown) {
+                state.harvester.sprite.x += 3;
+                state.harvester.sprite.rotation = - Math.PI / 2;
             }
 
-            if(this.game_state.left_key.isDown) {
-                this.game_state.harvester.x -= 3;
+            if (state.left_key.isDown) {
+                state.harvester.sprite.x -= 3;
+                state.harvester.sprite.rotation = Math.PI / 2;
             }
 
-            if(this.game_state.down_key.isDown) {
-                this.game_state.harvester.y += 3;
+            if (state.down_key.isDown) {
+                state.harvester.sprite.y += 3;
+                state.harvester.sprite.rotation = 0;
             }
 
-            if(this.game_state.up_key.isDown) {
-                this.game_state.harvester.y -= 3;
+            if (state.up_key.isDown) {
+                state.harvester.sprite.y -= 3;
+                state.harvester.sprite.rotation = Math.PI;
+            }
+
+            const changed_tile = update_harvester_position(this.game_state.harvester, this.game_state.map);
+            if (changed_tile) {
+                // Update tiles anyway just in case.
+                updated = true;
+                this.onMovedTiles(this.game_state);
             }
 
             if (updated) {
@@ -161,39 +171,42 @@ export class TileScreen extends Phaser.Scene {
         }
     }
 
-    onTouchPlant(): void {
-        if(this.game_state) {
-            const harvester = this.game_state.harvester;
-            const map_tile = this.game_state.map.getTileAtWorldXY(harvester.x, harvester.y, true);
-            const tile = this.game_state.tiles[map_tile.y]?.[map_tile.x];
-            console.log({
-                x: map_tile.x,
-                y: map_tile.y,
-                tile,
-            });
-            if(tile && tile.type == 'plant') {
-                const value = tile.object.harvest();
-                this.game_state.hauling += value;
-                this.updateHUD();
-                this.updateTiles();
-                this.flash_text(harvester.x, harvester.y, `+${value}`);
-                this.cameras.main.shake(undefined, 0.005);
+    onMovedTiles(state: GameState): void {
+        const map_tile = state.harvester.tile;
+        const tile = state.tiles[map_tile.y]?.[map_tile.x];
+
+        if (tile) {
+            switch (tile.type) {
+                case 'barn':
+                    this.onTouchBarn(state);
+                    break;
+                case 'plant':
+                    this.onTouchPlant(state, tile);
+                    break;
             }
         }
     }
 
-    onTouchBarn(): void {
-        if (this.game_state) {
-            const hauling = this.game_state.hauling;
-            this.game_state.sold += hauling;
-            this.game_state.hauling = 0;
-            this.flash_text(
-                this.game_state.harvester.x,
-                this.game_state.harvester.y,
-                `Sold ${hauling} tons!`,
-            );
-            this.updateHUD();
-        }
+    onTouchPlant(state: GameState, tile: PlantTile): void {
+        const harvester = state.harvester;
+        const value = tile.object.harvest();
+        state.hauling += value;
+        this.updateHUD();
+        this.updateTiles();
+        this.flash_text(harvester.sprite.x, harvester.sprite.y, `+${value}`);
+        this.cameras.main.shake(undefined, 0.005);
+    }
+
+    onTouchBarn(state: GameState): void {
+        const hauling = state.hauling;
+        state.sold += hauling;
+        state.hauling = 0;
+        this.flash_text(
+            state.harvester.sprite.x,
+            state.harvester.sprite.y,
+            `Sold ${hauling} tons!`,
+        );
+        this.updateHUD();
     }
 
     flash_text(x: number, y: number, text: string): void {

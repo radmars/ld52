@@ -1,16 +1,20 @@
-import { GameObjects, Tilemaps } from "phaser";
+import { GameObjects, Tilemaps, Tweens } from "phaser";
+import { TILE_SIZE } from "./map/tiles";
 
 export interface Harvester {
     sprite: Phaser.GameObjects.Image;
     tile: Tilemaps.Tile,
+    current_motion: Tweens.Tween | null;
 }
 
+// TILE POSITION
 export function make_harvester(map: Tilemaps.Tilemap, x: number, y: number, add: GameObjects.GameObjectFactory): Harvester {
-    const sprite = add.image(x, y, 'harvester', 0);
-    const tile = map.getTileAtWorldXY(x, y, true);
+    const sprite = add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 'harvester', 0);
+    const tile = map.getTileAt(x, y);
     return {
         sprite,
         tile,
+        current_motion: null,
     };
 }
 

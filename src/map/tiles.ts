@@ -1,4 +1,4 @@
-export const TILE_SIZE = 32;
+export const TILE_SIZE = 96;
 
 export type Frame = number;
 

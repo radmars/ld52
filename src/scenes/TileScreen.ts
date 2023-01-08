@@ -1,5 +1,4 @@
 import { GameObjects, Tilemaps } from "phaser";
-import { WINDOW_CENTER } from "../constants";
 import { PlantTile, Tile, TILE_SIZE } from '../map/tiles';
 import { build } from '../map/builder';
 import { Harvester, make_harvester, update_harvester_position } from "../harvester";
@@ -43,12 +42,12 @@ export class TileScreen extends Phaser.Scene {
             key: 'map',
             width: first_row.length,
             height: tiles.length,
-            tileWidth: 96,
-            tileHeight: 96,
+            tileWidth: TILE_SIZE,
+            tileHeight: TILE_SIZE,
         });
 
-        const ground_tileset = map.addTilesetImage('ground', undefined, 96, 96);
-        const plant_tileset = map.addTilesetImage('plants', undefined, 96, 96);
+        const ground_tileset = map.addTilesetImage('ground', undefined, TILE_SIZE, TILE_SIZE);
+        const plant_tileset = map.addTilesetImage('plants', undefined, TILE_SIZE, TILE_SIZE);
 
         const ground = map.createBlankLayer('ground', ground_tileset);
         ground.fill(0, 0, 0, map.width, map.height);
@@ -56,7 +55,7 @@ export class TileScreen extends Phaser.Scene {
         const plants = map.createBlankLayer('plants', plant_tileset);
         plants.fill(0, 0, 0, map.width, map.height);
 
-        const harvester = make_harvester(map, WINDOW_CENTER.x, WINDOW_CENTER.y, this.add);
+        const harvester = make_harvester(map, 4, 4, this.add);
 
         // TODO: Set Deadzone for harvester?
         this.cameras.main.setBounds(0, 0, TILE_SIZE * map.width, TILE_SIZE * map.height);
@@ -138,24 +137,43 @@ export class TileScreen extends Phaser.Scene {
                 }
             }
 
-            if (state.right_key.isDown) {
-                state.harvester.sprite.x += 3;
-                state.harvester.sprite.rotation = - Math.PI / 2;
-            }
 
-            if (state.left_key.isDown) {
-                state.harvester.sprite.x -= 3;
-                state.harvester.sprite.rotation = Math.PI / 2;
-            }
+            if(!state.harvester.current_motion) {
+                if (state.right_key.isDown) {
+                    this.start_harvester_motion(
+                        state,
+                        state.harvester.sprite.x + TILE_SIZE,
+                        state.harvester.sprite.y,
+                        0,
+                    );
+                }
 
-            if (state.down_key.isDown) {
-                state.harvester.sprite.y += 3;
-                state.harvester.sprite.rotation = 0;
-            }
+                if (state.left_key.isDown) {
+                    this.start_harvester_motion(
+                        state,
+                        state.harvester.sprite.x - TILE_SIZE,
+                        state.harvester.sprite.y,
+                        180,
+                    );
+                }
 
-            if (state.up_key.isDown) {
-                state.harvester.sprite.y -= 3;
-                state.harvester.sprite.rotation = Math.PI;
+                if (state.down_key.isDown) {
+                    this.start_harvester_motion(
+                        state,
+                        state.harvester.sprite.x,
+                        state.harvester.sprite.y + TILE_SIZE,
+                        90,
+                    );
+                }
+
+                if (state.up_key.isDown) {
+                    this.start_harvester_motion(
+                        state,
+                        state.harvester.sprite.x,
+                        state.harvester.sprite.y - TILE_SIZE,
+                        -90,
+                    );
+                }
             }
 
             const changed_tile = update_harvester_position(this.game_state.harvester, this.game_state.map);
@@ -249,6 +267,35 @@ export class TileScreen extends Phaser.Scene {
             ease: 'Expo.easeOut',
             onComplete: (_, targets: [GameObjects.Text]) => {
                 targets[0].destroy();
+            },
+        });
+    }
+
+    start_harvester_motion(state: GameState, x: number, y: number, angle: number): void{
+        const shortest = Phaser.Math.Angle.ShortestBetween(angle, state.harvester.sprite.angle);
+        const needs_rotate = shortest >= 1;
+        const newAngle = state.harvester.sprite.angle - shortest;
+
+        state.harvester.current_motion = this.add.tween({
+            targets: state.harvester.sprite,
+            y: {
+                value: y,
+                ease: 'linear',
+                duration: 500,
+                delay: needs_rotate ? 200 : 0,
+            },
+            x: {
+                value: x,
+                ease: 'linear',
+                duration: 500,
+                delay: needs_rotate ? 200 : 0,
+            },
+            angle: {
+                value: newAngle,
+                duration: needs_rotate ? 200 : 0,
+            },
+            onComplete: () => {
+                state.harvester.current_motion = null;
             },
         });
     }

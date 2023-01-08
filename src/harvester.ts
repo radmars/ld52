@@ -11,6 +11,9 @@ export interface Harvester {
 export function make_harvester(map: Tilemaps.Tilemap, x: number, y: number, add: GameObjects.GameObjectFactory): Harvester {
     const sprite = add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 'harvester', 0);
     const tile = map.getTileAt(x, y);
+
+    sprite.angle = 90;
+
     return {
         sprite,
         tile,

@@ -38,8 +38,8 @@ export class TileScreen extends Phaser.Scene {
             key: 'map',
             width: first_row.length,
             height: tiles.length,
-            tileWidth: 32,
-            tileHeight: 32,
+            tileWidth: 96,
+            tileHeight: 96,
         });
 
         const ground_tileset = map.addTilesetImage('ground', undefined, 96, 96);
@@ -104,11 +104,7 @@ export class TileScreen extends Phaser.Scene {
         });
 
         this.input.keyboard.on('keydown-SPACE', () => {
-            const added = 10;
-            game_state.hauling += added;
-            this.updateHUD();
-            this.flash_text(harvester.x, harvester.y, `+${added}`);
-            this.cameras.main.shake(undefined, 0.005);
+            this.onTouchPlant();
         });
 
         this.input.keyboard.on('keydown-B', () => {
@@ -117,7 +113,7 @@ export class TileScreen extends Phaser.Scene {
     }
 
     updateHUD(): void {
-        if(this.game_state) {
+        if (this.game_state) {
             this.game_state.hauling_text.setText(`Hauling ${this.game_state.hauling} tons of meat`);
             this.game_state.sold_text.setText(`Sold ${this.game_state.sold} tons of meat`);
         }
@@ -138,7 +134,7 @@ export class TileScreen extends Phaser.Scene {
     override update(time: number, delta: number): void {
         super.update(time, delta);
 
-        if(this.game_state) {
+        if (this.game_state) {
             let updated = false;
             for (const row of this.game_state.tiles) {
                 for (const tile of row) {
@@ -156,8 +152,29 @@ export class TileScreen extends Phaser.Scene {
         }
     }
 
-    onTouchBarn(): void {
+    onTouchPlant(): void {
         if(this.game_state) {
+            const harvester = this.game_state.harvester;
+            const map_tile = this.game_state.map.getTileAtWorldXY(harvester.x, harvester.y, true);
+            const tile = this.game_state.tiles[map_tile.y]?.[map_tile.x];
+            console.log({
+                x: map_tile.x,
+                y: map_tile.y,
+                tile,
+            });
+            if(tile && tile.type == 'plant') {
+                const value = tile.object.harvest();
+                this.game_state.hauling += value;
+                this.updateHUD();
+                this.updateTiles();
+                this.flash_text(harvester.x, harvester.y, `+${value}`);
+                this.cameras.main.shake(undefined, 0.005);
+            }
+        }
+    }
+
+    onTouchBarn(): void {
+        if (this.game_state) {
             const hauling = this.game_state.hauling;
             this.game_state.sold += hauling;
             this.game_state.hauling = 0;
@@ -173,7 +190,7 @@ export class TileScreen extends Phaser.Scene {
     flash_text(x: number, y: number, text: string): void {
         const text_flash = this.add.text(x, y, text, {
             font: '16px Rock Salt',
-            color: '#ff0000',
+            color: '#ffffff',
             stroke: '#000000',
             strokeThickness: 4,
         });
@@ -182,6 +199,25 @@ export class TileScreen extends Phaser.Scene {
             duration: 1500,
             alpha: 0,
             ease: 'linear',
+        });
+        const white = Phaser.Display.Color.HexStringToColor("#FFFFFF");
+        const red = Phaser.Display.Color.HexStringToColor("#FF0000");
+        this.tweens.addCounter({
+            from: 0,
+            to: 100,
+            yoyo: true,
+            duration: 75,
+            repeat: 50,
+            onUpdate: (tween) => {
+                const tint = Phaser.Display.Color.Interpolate.ColorWithColor(
+                    white,
+                    red,
+                    100,
+                    tween.getValue()
+                );
+                const color = Phaser.Display.Color.ObjectToColor(tint).color;
+                text_flash.setTint(color, color, color, color);
+            },
         });
         this.add.tween({
             targets: text_flash,

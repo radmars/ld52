@@ -7,7 +7,8 @@ type TileDefinitions = Record<string, () => Tile>;
 const map_tiles: TileDefinitions = {
     g: (): Tile => {
         const tile = new_plant_tile(meat.clone());
-        tile.object.updateTimer(Math.random() * 20000 + 4000);
+        // tile.object.updateTimer(Math.random() * 20000 + 4000);
+        tile.object.updateTimer(Math.random() * 1000 + 1100);
         return tile;
     },
     b: (): Tile => {

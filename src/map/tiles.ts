@@ -85,17 +85,28 @@ export class Plant {
                     this.timer = null;
                 }
                 else {
-                    this.currentIndex++;
-                    const currentFrame = this.indexes[this.currentIndex];
-                    if (currentFrame != undefined) {
-                        this.currentFrame = currentFrame;
-                    }
+                    this.setIndex(this.currentIndex + 1);
                 }
                 return true;
             }
             return false;
         }
         return false;
+    }
+
+    setIndex(idx: number): void {
+        this.currentIndex = idx;
+        const currentFrame = this.indexes[this.currentIndex];
+        if(currentFrame!= undefined) {
+            this.currentFrame = currentFrame;
+        }
+    }
+
+    harvest(): number {
+        this.setIndex(0);
+        
+        this.resetTimer();
+        return 10;
     }
 
     clone(): Plant {

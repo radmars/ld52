@@ -11,6 +11,10 @@ interface GameState {
     hauling: number;
     sold: number;
     sold_text: GameObjects.Text;
+    up_key: Phaser.Input.Keyboard.Key,
+    down_key: Phaser.Input.Keyboard.Key,
+    left_key: Phaser.Input.Keyboard.Key,
+    right_key: Phaser.Input.Keyboard.Key,
 }
 
 export class TileScreen extends Phaser.Scene {
@@ -80,6 +84,10 @@ export class TileScreen extends Phaser.Scene {
             hauling: 0,
             sold: 0,
             sold_text,
+            up_key:this.input.keyboard.addKey('UP'),
+            down_key:this.input.keyboard.addKey('DOWN'),
+            left_key:this.input.keyboard.addKey('LEFT'),
+            right_key:this.input.keyboard.addKey('RIGHT'),
         };
 
         this.game_state = game_state;
@@ -87,22 +95,7 @@ export class TileScreen extends Phaser.Scene {
         this.updateTiles();
         this.updateHUD();
 
-        this.input.keyboard.on('keydown-RIGHT', () => {
-            harvester.x += 3;
-        });
-
-        this.input.keyboard.on('keydown-LEFT', () => {
-            harvester.x -= 3;
-        });
-
-        this.input.keyboard.on('keydown-DOWN', () => {
-            harvester.y += 3;
-        });
-
-        this.input.keyboard.on('keydown-UP', () => {
-            harvester.y -= 3;
-        });
-
+        
         this.input.keyboard.on('keydown-SPACE', () => {
             this.onTouchPlant();
         });
@@ -144,6 +137,22 @@ export class TileScreen extends Phaser.Scene {
                         }
                     }
                 }
+            }
+
+            if(this.game_state.right_key.isDown) {
+                this.game_state.harvester.x += 3;
+            }
+
+            if(this.game_state.left_key.isDown) {
+                this.game_state.harvester.x -= 3;
+            }
+
+            if(this.game_state.down_key.isDown) {
+                this.game_state.harvester.y += 3;
+            }
+
+            if(this.game_state.up_key.isDown) {
+                this.game_state.harvester.y -= 3;
             }
 
             if (updated) {

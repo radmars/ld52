@@ -9,6 +9,8 @@ interface GameState {
     harvester: Phaser.GameObjects.Image;
     hauling_text: GameObjects.Text;
     hauling: number;
+    sold: number;
+    sold_text: GameObjects.Text;
 }
 
 export class TileScreen extends Phaser.Scene {
@@ -61,6 +63,13 @@ export class TileScreen extends Phaser.Scene {
             strokeThickness: 4,
         });
 
+        const sold_text = this.add.text(0, 36, '', {
+            font: '16px Rock Salt',
+            color: '#ececec',
+            stroke: '#000000',
+            strokeThickness: 4,
+        });
+
         hauling_text.setScrollFactor(0);
 
         const game_state: GameState = {
@@ -69,6 +78,8 @@ export class TileScreen extends Phaser.Scene {
             map,
             tiles,
             hauling: 0,
+            sold: 0,
+            sold_text,
         };
 
         this.game_state = game_state;
@@ -93,39 +104,22 @@ export class TileScreen extends Phaser.Scene {
         });
 
         this.input.keyboard.on('keydown-SPACE', () => {
-            game_state.hauling += 10;
+            const added = 10;
+            game_state.hauling += added;
             this.updateHUD();
-
-            const text_flash = this.add.text(harvester.x, harvester.y, '+10!', {
-                font: '16px Rock Salt',
-                color: '#ff0000',
-                stroke: '#000000',
-                strokeThickness: 4,
-            });
-            this.add.tween({
-                targets: text_flash,
-                duration: 1500,
-                alpha: 0,
-                ease: 'linear',
-            });
-            this.add.tween({
-                targets: text_flash,
-                duration: 1500,
-                x: harvester.x + 80 + (Math.random() * 50 - 25),
-                y: harvester.y - 80 + (Math.random() * 50 - 25),
-                ease: 'Expo.easeOut',
-                onComplete: (_, targets: [GameObjects.Text]) => {
-                    console.log("Text should be dead now");
-                    targets[0].destroy();
-                },
-            });
+            this.flash_text(harvester.x, harvester.y, `+${added}`);
             this.cameras.main.shake(undefined, 0.005);
+        });
+
+        this.input.keyboard.on('keydown-B', () => {
+            this.onTouchBarn();
         });
     }
 
     updateHUD(): void {
         if(this.game_state) {
             this.game_state.hauling_text.setText(`Hauling ${this.game_state.hauling} tons of meat`);
+            this.game_state.sold_text.setText(`Sold ${this.game_state.sold} tons of meat`);
         }
     }
 
@@ -160,5 +154,44 @@ export class TileScreen extends Phaser.Scene {
                 this.updateTiles();
             }
         }
+    }
+
+    onTouchBarn(): void {
+        if(this.game_state) {
+            const hauling = this.game_state.hauling
+            this.game_state.sold += hauling;
+            this.game_state.hauling = 0;
+            this.flash_text(
+                this.game_state.harvester.x,
+                this.game_state.harvester.y,
+                `Sold ${hauling} tons!`,
+            );
+            this.updateHUD();
+        }
+    }
+
+    flash_text(x: number, y: number, text: string): void {
+        const text_flash = this.add.text(x, y, text, {
+            font: '16px Rock Salt',
+            color: '#ff0000',
+            stroke: '#000000',
+            strokeThickness: 4,
+        });
+        this.add.tween({
+            targets: text_flash,
+            duration: 1500,
+            alpha: 0,
+            ease: 'linear',
+        });
+        this.add.tween({
+            targets: text_flash,
+            duration: 1500,
+            x: x + 80 + (Math.random() * 50 - 25),
+            y: y - 80 + (Math.random() * 50 - 25),
+            ease: 'Expo.easeOut',
+            onComplete: (_, targets: [GameObjects.Text]) => {
+                targets[0].destroy();
+            },
+        });
     }
 }

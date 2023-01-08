@@ -2,7 +2,7 @@
 Thumbs.db
 .DS_Store
 .vscode
-
+.yarn
 
 # Vendors
 node_modules/

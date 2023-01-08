@@ -15,6 +15,9 @@ interface GameState {
     down_key: Phaser.Input.Keyboard.Key,
     left_key: Phaser.Input.Keyboard.Key,
     right_key: Phaser.Input.Keyboard.Key,
+
+    healthy_text: GameObjects.Text;
+    healthy_tiles: number;
 }
 
 export class TileScreen extends Phaser.Scene {
@@ -77,6 +80,15 @@ export class TileScreen extends Phaser.Scene {
         });
         sold_text.setScrollFactor(0);
 
+        const healthy_text = this.add.text(800, 0, '', {
+            font: '16px Rock Salt',
+            color: '#ececec',
+            stroke: '#000000',
+            strokeThickness: 4,
+        });
+        healthy_text.setOrigin(1, 0);
+        healthy_text.setScrollFactor(0);
+
         const game_state: GameState = {
             harvester,
             hauling_text,
@@ -89,6 +101,9 @@ export class TileScreen extends Phaser.Scene {
             down_key: this.input.keyboard.addKey('DOWN'),
             left_key: this.input.keyboard.addKey('LEFT'),
             right_key: this.input.keyboard.addKey('RIGHT'),
+
+            healthy_tiles: this.get_healthy_tiles(tiles),
+            healthy_text,
         };
 
         this.game_state = game_state;
@@ -97,10 +112,23 @@ export class TileScreen extends Phaser.Scene {
         this.updateHUD();
     }
 
+    get_healthy_tiles(tiles: Tile[][]): number {
+        let healthy = 0;
+        for(const row of tiles) {
+            for(const cell of row) {
+                if(cell.type == 'plant' && cell.object.healthy()) {
+                    healthy++;
+                }
+            }
+        }
+        return healthy;
+    }
+
     updateHUD(): void {
         if (this.game_state) {
             this.game_state.hauling_text.setText(`Hauling ${this.game_state.hauling} tons of meat`);
             this.game_state.sold_text.setText(`Sold ${this.game_state.sold} tons of meat`);
+            this.game_state.healthy_text.setText(`${this.game_state.healthy_tiles} healthy plants remain`);
         }
     }
 
@@ -113,6 +141,8 @@ export class TileScreen extends Phaser.Scene {
                     layer.getTileAt(x, y).index = tile.object.current();
                 });
             });
+            this.game_state.healthy_tiles = this.get_healthy_tiles(this.game_state.tiles);
+            this.updateHUD();
         }
     }
 
@@ -131,7 +161,6 @@ export class TileScreen extends Phaser.Scene {
                     }
                 }
             }
-
 
             if(!state.harvester.current_motion) {
                 if (state.right_key.isDown) {
@@ -180,6 +209,10 @@ export class TileScreen extends Phaser.Scene {
 
             if (updated) {
                 this.updateTiles();
+
+                if(this.game_state.healthy_tiles == 0) {
+                    this.scene.start('GameOver');
+                }
             }
         }
     }

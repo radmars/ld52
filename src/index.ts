@@ -13,7 +13,6 @@ if (!devMode) {
 
 scenes.push(new TileScreen());
 
-
 new Phaser.Game(
     Object.assign(config, {
         scene: scenes,

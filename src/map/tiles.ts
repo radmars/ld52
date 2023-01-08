@@ -73,6 +73,10 @@ export class Plant {
         this.timer = this.timerIncrement;
     }
 
+    healthy(): boolean {
+        return this.currentIndex <= this.indexes.length - 1;
+    }
+
     /**
      * Returns true if the plant changed.
      */

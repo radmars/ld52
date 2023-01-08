@@ -158,7 +158,7 @@ export class TileScreen extends Phaser.Scene {
 
     onTouchBarn(): void {
         if(this.game_state) {
-            const hauling = this.game_state.hauling
+            const hauling = this.game_state.hauling;
             this.game_state.sold += hauling;
             this.game_state.hauling = 0;
             this.flash_text(

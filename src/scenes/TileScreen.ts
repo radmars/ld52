@@ -58,7 +58,8 @@ export class TileScreen extends Phaser.Scene {
         const plants = map.createBlankLayer('plants', plant_tileset);
         plants.fill(0, 0, 0, map.width, map.height);
 
-        const harvester = make_harvester(map, 4, 4, this.add);
+        const barnPosition = this.find_barn(tiles);
+        const harvester = make_harvester(map, barnPosition.x, barnPosition.y, this.add);
 
         // TODO: Set Deadzone for harvester?
         this.cameras.main.setBounds(0, 0, TILE_SIZE * map.width, TILE_SIZE * map.height);
@@ -110,6 +111,21 @@ export class TileScreen extends Phaser.Scene {
 
         this.updateTiles();
         this.updateHUD();
+    }
+
+    find_barn(tiles: Tile[][]): {x: number, y: number} {
+        for (let y = 0; y < tiles.length; y++) {
+            const row = tiles[y];
+            if (row) {
+                for (let x = 0; x < row.length; x++) {
+                    if (row[x]?.type == "barn") {
+                        return {x, y};
+                    }
+                }
+            }
+        }
+
+        throw new Error("NoBarnFound");
     }
 
     get_healthy_tiles(tiles: Tile[][]): number {

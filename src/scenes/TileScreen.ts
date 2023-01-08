@@ -14,8 +14,9 @@ export class TileScreen extends Phaser.Scene {
     }
 
     preload(): void {
-        this.load.image('tiles', 'assets/tiles/tiles.png');
-        this.load.image('einstein', 'assets/harvester.png');
+        this.load.image('ground', 'assets/tiles/ground.png');
+        this.load.image('plants', 'assets/tiles/plants.png');
+        this.load.image('harvester', 'assets/harvester.png');
     }
 
     create(): void {
@@ -35,9 +36,13 @@ export class TileScreen extends Phaser.Scene {
         const harvester = this.add.image(WINDOW_CENTER.x, WINDOW_CENTER.y, 'harvester');
         this.harvester = harvester;
 
-        const tileset = this.map.addTilesetImage('tiles', undefined, 32, 32);
+        const ground_tileset = this.map.addTilesetImage('ground', undefined, 96, 96);
+        const plant_tileset = this.map.addTilesetImage('plants', undefined, 96, 96);
 
-        const plants = this.map.createBlankLayer('plants', tileset);
+        const ground = this.map.createBlankLayer('ground', ground_tileset);
+        ground.fill(0, 0, 0, this.map.width, this.map.height);
+
+        const plants = this.map.createBlankLayer('plants', plant_tileset);
         plants.fill(0, 0, 0, this.map.width, this.map.height);
 
         this.cameras.main.setBounds(0, 0, TILE_SIZE * this.map.width, TILE_SIZE * this.map.height);
@@ -86,7 +91,7 @@ export class TileScreen extends Phaser.Scene {
         for (const row of this.tiles) {
             for (const tile of row) {
                 if (tile.type == 'plant') {
-                    if (tile.object.evolve(delta)) {
+                    if (tile.object.grow(delta)) {
                         updated = true;
                     }
                 }

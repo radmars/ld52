@@ -43,7 +43,7 @@ export class Plant {
     private indexes: Frame[];
     private currentIndex: number;
     private currentFrame: Frame;
-    private timer: number;
+    private timer: number | null;
     private timerIncrement: number;
 
     constructor({ indexes, timer }: PlantParams) {
@@ -69,24 +69,26 @@ export class Plant {
     }
 
     /**
-     * Returns true if the plant evolved.
+     * Returns true if the plant changed.
      */
-    evolve(dt: number): boolean {
-        this.timer -= dt;
-        if (this.timer <= 0) {
-            this.resetTimer();
-            if (this.currentIndex >= this.indexes.length) {
-                this.currentIndex = 0;
+    grow(dt: number): boolean {
+        if (this.timer) {
+            this.timer -= dt;
+            if (this.timer <= 0) {
+                this.resetTimer();
+                if (this.currentIndex >= this.indexes.length) {
+                    this.timer = null;
+                }
+                else {
+                    this.currentIndex++;
+                    const currentFrame = this.indexes[this.currentIndex];
+                    if (currentFrame != undefined) {
+                        this.currentFrame = currentFrame;
+                    }
+                }
+                return true;
             }
-            else {
-                this.currentIndex++;
-            }
-
-            const currentFrame = this.indexes[this.currentIndex];
-            if(currentFrame != undefined) {
-                this.currentFrame = currentFrame;
-            }
-            return true;
+            return false;
         }
         return false;
     }

@@ -119,7 +119,7 @@ export class TileScreen extends Phaser.Scene {
                     targets[0].destroy();
                 },
             });
-            this.cameras.main.shake();
+            this.cameras.main.shake(undefined, 0.005);
         });
     }
 

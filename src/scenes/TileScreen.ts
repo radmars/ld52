@@ -1,6 +1,6 @@
 import { GameObjects, Tilemaps } from "phaser";
 import { WINDOW_CENTER } from "../constants";
-import { BarnTile, PlantTile, Tile, TILE_SIZE } from '../map/tiles';
+import { PlantTile, Tile, TILE_SIZE } from '../map/tiles';
 import { build } from '../map/builder';
 import { Harvester, make_harvester, update_harvester_position } from "../harvester";
 
@@ -177,12 +177,12 @@ export class TileScreen extends Phaser.Scene {
 
         if (tile) {
             switch (tile.type) {
-                case 'barn':
-                    this.onTouchBarn(state);
-                    break;
-                case 'plant':
-                    this.onTouchPlant(state, tile);
-                    break;
+            case 'barn':
+                this.onTouchBarn(state);
+                break;
+            case 'plant':
+                this.onTouchPlant(state, tile);
+                break;
             }
         }
     }

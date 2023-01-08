@@ -77,7 +77,6 @@ export class TileScreen extends Phaser.Scene {
         });
         sold_text.setScrollFactor(0);
 
-
         const game_state: GameState = {
             harvester,
             hauling_text,
@@ -96,10 +95,6 @@ export class TileScreen extends Phaser.Scene {
 
         this.updateTiles();
         this.updateHUD();
-
-        this.input.keyboard.on('keydown-B', () => {
-            this.onTouchBarn(game_state);
-        });
     }
 
     updateHUD(): void {

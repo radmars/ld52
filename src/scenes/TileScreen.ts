@@ -305,27 +305,34 @@ export class TileScreen extends Phaser.Scene {
         const needs_rotate = shortest >= 1 || shortest <= -1;
         const newAngle = state.harvester.sprite.angle - shortest;
 
-        state.harvester.current_motion = this.add.tween({
-            targets: state.harvester.sprite,
-            y: {
-                value: y,
-                ease: 'linear',
-                duration: 500,
-                delay: needs_rotate ? 200 : 0,
-            },
-            x: {
-                value: x,
-                ease: 'linear',
-                duration: 500,
-                delay: needs_rotate ? 200 : 0,
-            },
-            angle: {
-                value: newAngle,
-                duration: needs_rotate ? 200 : 0,
-            },
-            onComplete: () => {
-                state.harvester.current_motion = null;
-            },
-        });
+        const destintationTile = state.map.getTileAtWorldXY(x, y, false) as Tilemaps.Tile | null;
+        if (destintationTile == null) {
+            return;
+        }
+        const destinationType = state.tiles [destintationTile.y]?. [destintationTile.x];
+        if (destinationType != undefined && destinationType.type == "plant") {
+            state.harvester.current_motion = this.add.tween({
+                targets: state.harvester.sprite,
+                y: {
+                    value: y,
+                    ease: 'linear',
+                    duration: 500,
+                    delay: needs_rotate ? 200 : 0,
+                },
+                x: {
+                    value: x,
+                    ease: 'linear',
+                    duration: 500,
+                    delay: needs_rotate ? 200 : 0,
+                },
+                angle: {
+                    value: newAngle,
+                    duration: needs_rotate ? 200 : 0,
+                },
+                onComplete: () => {
+                    state.harvester.current_motion = null;
+                },
+            });
+        }
     }
 }

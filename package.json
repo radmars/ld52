@@ -29,5 +29,6 @@
     "phaser": "^3.55.2",
     "typescript": "^4.8.4",
     "vite": "^4.0.4"
-  }
+  },
+  "packageManager": "yarn@3.3.1"
 }

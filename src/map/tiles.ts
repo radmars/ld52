@@ -42,7 +42,31 @@ export function new_plant_tile(p: Plant): PlantTile {
     };
 }
 
-export type Tile = PlantTile | BarnTile;
+interface ImpassibleTile {
+    type: 'impassible';
+    object: ImpassibleTerrain;
+}
+
+export class ImpassibleTerrain {
+    private frame: Frame;
+
+    constructor(frame: Frame) {
+        this.frame = frame;
+    }
+
+    current(): Frame {
+        return this.frame;
+    }
+}
+
+export function new_impassible_tile(frame: number): ImpassibleTile {
+    return {
+        type: 'impassible',
+        object: new ImpassibleTerrain(frame),
+    };
+}
+
+export type Tile = PlantTile | BarnTile | ImpassibleTile;
 
 export interface PlantParams {
     stages: PlantStage[];

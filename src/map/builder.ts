@@ -1,4 +1,4 @@
-import { new_plant_tile, new_barn_tile, Barn, Plant, Tile, PlantStage } from './tiles';
+import { new_plant_tile, new_barn_tile, Barn, Plant, Tile, PlantStage, new_impassible_tile } from './tiles';
 
 const meat_stages: PlantStage[] = [ 
     {
@@ -77,6 +77,7 @@ function random_mutation_10(input: number): number {
 type TileDefinitions = Record<string, () => Tile>;
 
 const map_tiles: TileDefinitions = {
+    // Standard ground
     g: (): Tile => {
         const stages = meat_stages.map((stage) => {
             return {
@@ -88,44 +89,39 @@ const map_tiles: TileDefinitions = {
         return new_plant_tile(plant);
     },
 
-    b: (): Tile => {
+    B: (): Tile => {
         return new_barn_tile(new Barn());
-    }
+    },
+
+    // "blank" impassible terrain
+    i: (): Tile => new_impassible_tile(7),
+
+    // fence segments
+    p: (): Tile => new_impassible_tile(7),
+    d: (): Tile => new_impassible_tile(7),
+    b: (): Tile => new_impassible_tile(7),
+    q: (): Tile => new_impassible_tile(7),
+    '-': (): Tile => new_impassible_tile(7),
+    '|': (): Tile => new_impassible_tile(7),
 };
 
 export function build(): Tile[][] {
     let map = `
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        bbggggggggggggggggggggggggggggggggggggggg
-        bbggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
-        ggggggggggggggggggggggggggggggggggggggggg
+        iiiiiiiiiiiiii
+        p-----iBi----q
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        |gggggggggggg|
+        b------------d
     `;
     map = map.replaceAll(/^\s*\n/gm, '')
         .replaceAll(/^\s*$/gm, '');

@@ -172,7 +172,7 @@ export class TileScreen extends Phaser.Scene {
                     );
                 }
 
-                if (state.left_key.isDown) {
+                else if (state.left_key.isDown) {
                     this.start_harvester_motion(
                         state,
                         state.harvester.sprite.x - TILE_SIZE,
@@ -181,7 +181,7 @@ export class TileScreen extends Phaser.Scene {
                     );
                 }
 
-                if (state.down_key.isDown) {
+                else if (state.down_key.isDown) {
                     this.start_harvester_motion(
                         state,
                         state.harvester.sprite.x,
@@ -190,7 +190,7 @@ export class TileScreen extends Phaser.Scene {
                     );
                 }
 
-                if (state.up_key.isDown) {
+                else if (state.up_key.isDown) {
                     this.start_harvester_motion(
                         state,
                         state.harvester.sprite.x,

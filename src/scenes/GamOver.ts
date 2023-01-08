@@ -7,6 +7,7 @@ export class GameOver extends Phaser.Scene {
     }
 
     preload(): void {
+        console.log("GO2");
         this.load.image('bg', 'assets/gameover.png');
         this.load.audio('gameovermusic', ['assets/intro/radmarslogo.m4a', 'assets/intro/radmarslogo.ogg']);
     }

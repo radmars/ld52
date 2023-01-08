@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import RadmarsScreen from './scenes/RadmarsScreen';
 import config from './config';
 import { TileScreen } from './scenes/TileScreen';
+import { GameOver } from './scenes/GamOver';
 
 const urlParams = new URLSearchParams(window.location.search);
 const devMode = urlParams.get('dev') === 'true' ? true : false;
@@ -12,6 +13,7 @@ if (!devMode) {
 }
 
 scenes.push(new TileScreen());
+scenes.push(new GameOver());
 
 new Phaser.Game(
     Object.assign(config, {

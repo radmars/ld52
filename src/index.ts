@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import RadmarsScreen from './scenes/RadmarsScreen';
 import config from './config';
 import { TileScreen } from './scenes/TileScreen';
-import { GameOver } from './scenes/GamOver';
+import { GameOver } from './scenes/GameOver';
 
 const urlParams = new URLSearchParams(window.location.search);
 const devMode = urlParams.get('dev') === 'true' ? true : false;

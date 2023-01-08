@@ -273,7 +273,7 @@ export class TileScreen extends Phaser.Scene {
 
     start_harvester_motion(state: GameState, x: number, y: number, angle: number): void{
         const shortest = Phaser.Math.Angle.ShortestBetween(angle, state.harvester.sprite.angle);
-        const needs_rotate = shortest >= 1;
+        const needs_rotate = shortest >= 1 || shortest <= -1;
         const newAngle = state.harvester.sprite.angle - shortest;
 
         state.harvester.current_motion = this.add.tween({

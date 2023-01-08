@@ -2,6 +2,16 @@ export const TILE_SIZE = 96;
 
 export type Frame = number;
 
+export interface PlantStage {
+    frames: Frame[],
+    animation_time: number;
+    stage_duration: number;
+    value: number;
+    flashing: boolean;
+    terminal_stage: boolean;
+    infested: boolean;
+}
+
 export interface BarnTile {
     type: 'barn';
     object: Barn;
@@ -35,82 +45,76 @@ export function new_plant_tile(p: Plant): PlantTile {
 export type Tile = PlantTile | BarnTile;
 
 export interface PlantParams {
-    indexes: number[];
-    timer: number;
+    stages: PlantStage[];
 }
 
 export class Plant {
-    private indexes: Frame[];
+    private stages: PlantStage[];
     private currentIndex: number;
-    private currentFrame: Frame;
-    private timer: number | null;
-    private timerIncrement: number;
+    private currentStage: PlantStage;
+    private timer: number;
 
-    constructor({ indexes, timer }: PlantParams) {
-        const currentFrame = indexes[0];
+    constructor({ stages }: PlantParams) {
+        const currentStage = stages[0];
 
-        if (currentFrame == undefined) {
+        if (currentStage == undefined) {
             throw new Error("Must have at least one frame indexed");
         }
 
-        this.indexes = indexes;
+        this.stages = stages;
         this.currentIndex = 0;
-        this.timer = timer;
-        this.timerIncrement = timer;
-        this.currentFrame = currentFrame;
+        this.currentStage = currentStage;
+        this.timer = 0;
     }
 
+    /*
     updateTimer(increment: number): void {
         this.timer = increment;
         this.timerIncrement = increment;
     }
+    */
 
     current(): number {
-        return this.currentFrame;
+        return this.currentStage.frames[0] ?? 12;
     }
 
+    /*
     resetTimer(): void {
         this.timer = this.timerIncrement;
     }
+    */
 
     healthy(): boolean {
-        return this.currentIndex <= this.indexes.length - 1;
+        return !this.currentStage.infested;
     }
 
     /**
      * Returns true if the plant changed.
      */
     grow(dt: number): boolean {
-        if (this.timer) {
+        if (!this.currentStage.terminal_stage) {
             this.timer -= dt;
             if (this.timer <= 0) {
-                this.resetTimer();
-                if (this.currentIndex >= this.indexes.length) {
-                    this.timer = null;
-                }
-                else {
-                    this.setIndex(this.currentIndex + 1);
-                }
+                this.setStage(this.currentIndex + 1);
                 return true;
             }
-            return false;
         }
         return false;
     }
 
-    setIndex(idx: number): void {
+    setStage(idx: number): void {
         this.currentIndex = idx;
-        const currentFrame = this.indexes[this.currentIndex];
-        if(currentFrame!= undefined) {
-            this.currentFrame = currentFrame;
+        const currentFrame = this.stages[this.currentIndex];
+        if(currentFrame != undefined) {
+            this.currentStage = currentFrame;
+            this.timer = this.currentStage.stage_duration;
         }
     }
 
     harvest(): number {
-        this.setIndex(0);
-        
-        this.resetTimer();
-        return 10;
+        const value = this.currentStage.value;
+        this.setStage(0);
+        return value;
     }
 
     clone(): Plant {

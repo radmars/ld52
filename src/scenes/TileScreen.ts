@@ -310,7 +310,7 @@ export class TileScreen extends Phaser.Scene {
             return;
         }
         const destinationType = state.tiles [destintationTile.y]?. [destintationTile.x];
-        if (destinationType != undefined && destinationType.type == "plant") {
+        if (destinationType != undefined && (destinationType.type == "plant" || destinationType.type == "barn")) {
             state.harvester.current_motion = this.add.tween({
                 targets: state.harvester.sprite,
                 y: {

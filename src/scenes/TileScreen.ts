@@ -96,6 +96,29 @@ export class TileScreen extends Phaser.Scene {
             game_state.hauling += 10;
             this.updateHUD();
 
+            const text_flash = this.add.text(harvester.x, harvester.y, '+10!', {
+                font: '16px Rock Salt',
+                color: '#ff0000',
+                stroke: '#000000',
+                strokeThickness: 4,
+            });
+            this.add.tween({
+                targets: text_flash,
+                duration: 1500,
+                alpha: 0,
+                ease: 'linear',
+            });
+            this.add.tween({
+                targets: text_flash,
+                duration: 1500,
+                x: harvester.x + 80 + (Math.random() * 50 - 25),
+                y: harvester.y - 80 + (Math.random() * 50 - 25),
+                ease: 'Expo.easeOut',
+                onComplete: (_, targets: [GameObjects.Text]) => {
+                    console.log("Text should be dead now");
+                    targets[0].destroy();
+                },
+            });
             this.cameras.main.shake();
         });
     }

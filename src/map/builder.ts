@@ -1,12 +1,14 @@
 import {new_plant_tile, new_barn_tile, Barn, Plant, Tile} from './tiles';
 
-const meat = new Plant({ timer: 2000, indexes: [0, 1, 2, 3] });
+const meat = new Plant({ timer: 500, indexes: [0, 1, 2, 3, 4, 5] });
 
 type TileDefinitions = Record<string, () => Tile>;
 
 const map_tiles: TileDefinitions = {
     g: (): Tile => {
-        return new_plant_tile(meat.clone());
+        const tile = new_plant_tile(meat.clone());
+        tile.object.timer = Math.random() * 2000 + 500;
+        return tile;
     },
     b: (): Tile => {
         return new_barn_tile(new Barn());

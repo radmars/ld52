@@ -64,7 +64,6 @@ export class TileScreen extends Phaser.Scene {
 
         this.input.keyboard.on('keydown-UP', () => {
             harvester.y -= 3;
-            console.log('right up!');
         });
 
         this.input.keyboard.on('keydown-SPACE', () => {

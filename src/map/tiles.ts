@@ -43,7 +43,7 @@ export class Plant {
     private indexes: Frame[];
     private currentIndex: number;
     private currentFrame: Frame;
-    private timer: number | null;
+    timer: number | null;
     private timerIncrement: number;
 
     constructor({ indexes, timer }: PlantParams) {

@@ -27,7 +27,7 @@ const meat_stages: PlantStage[] = [
     },
     {
         frames: [3],
-        infested_frames: [16],
+        infested_frames: [6],
         animation_time: 100,
         stage_duration: 1000,
         terminal_stage: false,
@@ -36,7 +36,7 @@ const meat_stages: PlantStage[] = [
     // the good shit
     {
         frames: [4],
-        infested_frames: [17],
+        infested_frames: [6],
         animation_time: 100,
         stage_duration: 5000,
         terminal_stage: false,
@@ -45,7 +45,7 @@ const meat_stages: PlantStage[] = [
     // expired
     {
         frames: [5],
-        infested_frames: [18],
+        infested_frames: [6],
         animation_time: 100,
         // doesn't matter...
         stage_duration: 0,
@@ -78,17 +78,17 @@ const map_tiles: TileDefinitions = {
     },
 
     // "blank" impassible terrain
-    i: (): Tile => new_impassible_tile(7),
+    i: (): Tile => new_impassible_tile(27),
 
     // fence segments
-    p: (): Tile => new_impassible_tile(8),
-    d: (): Tile => new_impassible_tile(12),
-    b: (): Tile => new_impassible_tile(14),
-    q: (): Tile => new_impassible_tile(10),
-    '-': (): Tile => new_impassible_tile(9),
-    '|': (): Tile => new_impassible_tile(11),
-    '=': (): Tile => new_impassible_tile(13),
-    '/': (): Tile => new_impassible_tile(15),
+    p: (): Tile => new_impassible_tile(18),
+    d: (): Tile => new_impassible_tile(26),
+    b: (): Tile => new_impassible_tile(24),
+    q: (): Tile => new_impassible_tile(20),
+    '-': (): Tile => new_impassible_tile(19),
+    '|': (): Tile => new_impassible_tile(23),
+    '=': (): Tile => new_impassible_tile(25),
+    '/': (): Tile => new_impassible_tile(21),
 };
 
 export function build(): Tile[][] {

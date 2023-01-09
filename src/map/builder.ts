@@ -97,10 +97,10 @@ const map_tiles: TileDefinitions = {
     i: (): Tile => new_impassible_tile(7),
 
     // fence segments
-    p: (): Tile => new_impassible_tile(7),
+    p: (): Tile => new_impassible_tile(8),
     d: (): Tile => new_impassible_tile(12),
     b: (): Tile => new_impassible_tile(14),
-    q: (): Tile => new_impassible_tile(7),
+    q: (): Tile => new_impassible_tile(10),
     '-': (): Tile => new_impassible_tile(9),
     '|': (): Tile => new_impassible_tile(11),
     '=': (): Tile => new_impassible_tile(13),

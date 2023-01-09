@@ -15,7 +15,7 @@ interface GameState {
     left_key: Phaser.Input.Keyboard.Key,
     right_key: Phaser.Input.Keyboard.Key,
 
-    healthy_text: GameObjects.Text;
+    health_text: GameObjects.Text;
     healthy_tiles: number;
     spores: Spore[];
 }
@@ -112,14 +112,14 @@ export class TileScreen extends Phaser.Scene {
         });
         sold_text.setScrollFactor(0);
 
-        const healthy_text = this.add.text(800, 0, '', {
+        const health_text = this.add.text(800, 0, '', {
             font: '16px Rock Salt',
             color: '#ececec',
             stroke: '#000000',
             strokeThickness: 4,
         });
-        healthy_text.setOrigin(1, 0);
-        healthy_text.setScrollFactor(0);
+        health_text.setOrigin(1, 0);
+        health_text.setScrollFactor(0);
 
         const game_state: GameState = {
             harvester,
@@ -134,7 +134,7 @@ export class TileScreen extends Phaser.Scene {
             right_key: this.input.keyboard.addKey('RIGHT'),
 
             healthy_tiles: this.get_healthy_tiles(tiles),
-            healthy_text,
+            health_text,
             spores: [],
         };
 
@@ -182,7 +182,7 @@ export class TileScreen extends Phaser.Scene {
         if (this.game_state) {
             this.game_state.hauling_text.setText(`Harvester carrying ${this.game_state.harvester.carrying} of ${this.game_state.harvester.limit} tons of meat`);
             this.game_state.sold_text.setText(`Sold ${this.game_state.sold} tons of meat`);
-            this.game_state.healthy_text.setText(`${this.game_state.healthy_tiles} healthy plants remain`);
+            this.game_state.health_text.setText(`${this.game_state.harvester.health} harvester health`);
         }
     }
 
@@ -239,7 +239,7 @@ export class TileScreen extends Phaser.Scene {
                         hit = true;
                     }
 
-                    if(hit) {
+                    if (hit) {
                         state.spores = state.spores.filter(other => other != spore);
                         spore.image.play("explode");
                         spore.image.once(Phaser.Animations.Events.ANIMATION_COMPLETE as string, () => {
@@ -248,7 +248,7 @@ export class TileScreen extends Phaser.Scene {
                         });
                     }
                     if (hitHarvester) {
-                        console.log("HARV!!!!");
+                        state.harvester.health -= 1;
                     }
                 }
             }
@@ -413,6 +413,7 @@ export class TileScreen extends Phaser.Scene {
             state.harvester.sprite.y,
             `Sold ${hauling} tons!`,
         );
+        state.harvester.health = 5;
         this.updateHUD();
         this.sound.play('brake');
         this.sound.play('barn');

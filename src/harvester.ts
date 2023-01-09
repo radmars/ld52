@@ -7,6 +7,7 @@ export interface Harvester {
     current_motion: Tweens.Tween | null;
     limit: number;
     carrying: number;
+    health: number;
 }
 
 // TILE POSITION
@@ -22,6 +23,7 @@ export function make_harvester(map: Tilemaps.Tilemap, x: number, y: number, add:
         current_motion: null,
         limit: 5000,
         carrying: 0,
+        health: 5,
     };
 }
 

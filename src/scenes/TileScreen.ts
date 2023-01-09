@@ -45,6 +45,14 @@ export class TileScreen extends Phaser.Scene {
             frameHeight: 24,
         });
         this.load.image('harvester', 'assets/harvester.png');
+
+        this.load.audio('barn', ['assets/audio/barn.m4a', 'assets/audio/barn.ogg']);
+        this.load.audio('brake', ['assets/audio/brake.m4a', 'assets/audio/brake.ogg']);
+        this.load.audio('harvest', ['assets/audio/harvest.m4a', 'assets/audio/harvest.ogg']);
+        this.load.audio('infest', ['assets/audio/infest.m4a', 'assets/audio/infest.ogg']);
+        this.load.audio('move', ['assets/audio/move.m4a', 'assets/audio/move.ogg']);
+        this.load.audio('rotate', ['assets/audio/rotate.m4a', 'assets/audio/rotate.ogg']);
+        this.load.audio('spore', ['assets/audio/spore.m4a', 'assets/audio/spore.ogg']);
     }
 
     create(): void {
@@ -209,6 +217,7 @@ export class TileScreen extends Phaser.Scene {
                     let hit= false;
                     if (destinationType.type == "plant" && destinationType.object.canInfest() && !destinationType.object.isInfested()) {
                         destinationType.object.infest();
+                        this.sound.play('infest');
                         updated = true;
                         hit = true;
                     }
@@ -240,6 +249,7 @@ export class TileScreen extends Phaser.Scene {
                 // Randomly pick a tile to infest.
                 if (Math.random() * 150 > 149) {
                     tile.object.infest();
+                    this.sound.play('infest');
                 }
             }
 
@@ -248,6 +258,7 @@ export class TileScreen extends Phaser.Scene {
                 this.makeSpore(state, x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, -1, 0);
                 this.makeSpore(state, x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 0, 1);
                 this.makeSpore(state, x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 0, -1);
+                this.sound.play('spore');
             }
 
             updated = true;
@@ -357,6 +368,9 @@ export class TileScreen extends Phaser.Scene {
         const harvester = state.harvester;
         const value = tile.object.harvest();
         state.hauling += value;
+        if (value > 0) {
+            this.sound.play('harvest');
+        }
         this.updateHUD();
         this.updateTiles();
         this.flash_text(harvester.sprite.x, harvester.sprite.y, `+${value}`);
@@ -373,6 +387,8 @@ export class TileScreen extends Phaser.Scene {
             `Sold ${hauling} tons!`,
         );
         this.updateHUD();
+        this.sound.play('brake');
+        this.sound.play('barn');
     }
 
     flash_text(x: number, y: number, text: string): void {
@@ -452,6 +468,20 @@ export class TileScreen extends Phaser.Scene {
                     state.harvester.current_motion = null;
                 },
             });
+
+            if (needs_rotate) {
+                this.sound.play('rotate');
+                this.time.addEvent(
+                    {
+                        delay: 200,
+                        callback: () => {
+                            this.sound.play('move');
+                        }
+                    });
+            }
+            else {
+                this.sound.play('move');
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ export class TileScreen extends Phaser.Scene {
 
     constructor() {
         super('TileScreen');
+        this.timeElapsed = 0;
     }
 
     preload(): void {
@@ -138,7 +139,6 @@ export class TileScreen extends Phaser.Scene {
         };
 
         this.game_state = game_state;
-        this.timeElapsed = 0;
 
         this.updateTiles();
         this.updateHUD();
@@ -215,12 +215,16 @@ export class TileScreen extends Phaser.Scene {
         for (const spore of state.spores) {
             spore.image.x += d * spore.dx;
             spore.image.y += d * spore.dy;
+            
+            let hit = false;
+
+            const harv = state.harvester.sprite;
+            if(Math.abs(harv.x - spore.image.x)<42 && (Math.abs(harv.y - spore.image.y)<42)) hit = true;
 
             const destintationTile = state.map.getTileAtWorldXY(spore.image.x, spore.image.y, false) as Tilemaps.Tile | null;
             if (destintationTile) {
                 const destinationType = state.tiles[destintationTile.y]?.[destintationTile.x];
                 if (destinationType) {
-                    let hit= false;
                     if (destinationType.type == "plant" && destinationType.object.canInfest() && !destinationType.object.isInfested()) {
                         destinationType.object.infest();
                         this.sound.play('infest');

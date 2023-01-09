@@ -20,7 +20,7 @@ export function make_harvester(map: Tilemaps.Tilemap, x: number, y: number, add:
         sprite,
         tile,
         current_motion: null,
-        limit: 1000,
+        limit: 5000,
         carrying: 0,
     };
 }

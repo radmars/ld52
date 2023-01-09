@@ -142,7 +142,7 @@ export class TileScreen extends Phaser.Scene {
         this.updateHUD();
 
         this.input.keyboard.on('keydown-SPACE', () => {
-            this.makeSpore(game_state, harvester.sprite.x, harvester.sprite.y, 1, 0);
+            //this.makeSpore(game_state, harvester.sprite.x, harvester.sprite.y, 1, 0);
         });
 
         const music = this.sound.add('music', { volume: 0.5, loop: true });
@@ -249,9 +249,9 @@ export class TileScreen extends Phaser.Scene {
         const already_infested = tile.object.isInfested();
 
         if (tile.object.grow(delta)) {
-            if(!already_infested && tile.object.canInfest()) {
+            if(!already_infested && tile.object.canInfest() && tile.object.hasMatured()) {
                 // Randomly pick a tile to infest.
-                if (Math.random() * 150 > 149) {
+                if (Math.random() * 100 > 96) {
                     tile.object.infest();
                     this.sound.play('infest');
                 }
@@ -376,14 +376,14 @@ export class TileScreen extends Phaser.Scene {
             state.harvester.carrying += value;
             this.flash_text(harvester.sprite.x, harvester.sprite.y, `+${value}`);
             if (value == 100) {
-                this.sound.play('harvest');
+                this.sound.play('harvest'), { volume : 0.2 };
             }
-            this.sound.play('chop', { volume : 0.25 });
+            this.sound.play('chop', { volume : 0.2 });
         }
         else {
             this.flash_text(harvester.sprite.x, harvester.sprite.y, `Full! Go unload!`);
             this.sound.play('harvestfail', { volume: value / 100.0 });
-            this.sound.play('chop', { volume : 0.25 });
+            this.sound.play('chop', { volume : 0.2 });
         }
         this.updateHUD();
         this.updateTiles();
@@ -464,18 +464,18 @@ export class TileScreen extends Phaser.Scene {
                 y: {
                     value: y,
                     ease: 'linear',
-                    duration: 500,
-                    delay: needs_rotate ? 200 : 0,
+                    duration: 400,
+                    delay: needs_rotate ? 150 : 0,
                 },
                 x: {
                     value: x,
                     ease: 'linear',
-                    duration: 500,
-                    delay: needs_rotate ? 200 : 0,
+                    duration: 400,
+                    delay: needs_rotate ? 150 : 0,
                 },
                 angle: {
                     value: newAngle,
-                    duration: needs_rotate ? 200 : 0,
+                    duration: needs_rotate ? 150 : 0,
                 },
                 onComplete: () => {
                     state.harvester.current_motion = null;

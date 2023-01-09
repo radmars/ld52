@@ -77,9 +77,11 @@ export class Plant {
     private currentStage: PlantStage;
     private timer: number;
     private infested: boolean;
+    private hasMaturedOnce: boolean;
 
     constructor({ stages }: PlantParams) {
-        const currentStage = stages[0];
+        const startingStage = Math.floor(Math.random()*4);
+        const currentStage = stages[startingStage];
 
         if (currentStage == undefined) {
             throw new Error("Must have at least one frame indexed");
@@ -87,9 +89,12 @@ export class Plant {
 
         this.infested = false;
         this.stages = stages;
-        this.currentIndex = 0;
+        this.currentIndex = startingStage;
         this.currentStage = currentStage;
         this.timer = 0;
+
+        this.hasMaturedOnce = false;
+
     }
 
     canInfest(): boolean {
@@ -99,11 +104,16 @@ export class Plant {
     infest(): void {
         if(this.canInfest()) {
             this.infested = true;
+            this.timer = 8000;
         }
     }
 
     isInfested(): boolean {
         return this.infested;
+    }
+
+    hasMatured(): boolean {
+        return this.hasMaturedOnce;
     }
 
     /*
@@ -143,6 +153,7 @@ export class Plant {
             this.timer -= dt;
             if (this.timer <= 0) {
                 this.setStage(this.currentIndex + 1);
+                if(this.currentStage.infested_frames.length > 0) this.hasMaturedOnce = true;
                 return true;
             }
         }

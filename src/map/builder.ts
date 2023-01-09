@@ -27,7 +27,7 @@ const meat_stages: PlantStage[] = [
     },
     {
         frames: [3],
-        infested_frames: [6],
+        infested_frames: [],
         animation_time: 100,
         stage_duration: 1000,
         terminal_stage: false,
@@ -45,7 +45,7 @@ const meat_stages: PlantStage[] = [
     // expired
     {
         frames: [5],
-        infested_frames: [6],
+        infested_frames: [],
         animation_time: 100,
         // doesn't matter...
         stage_duration: 0,

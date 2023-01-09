@@ -119,7 +119,7 @@ export class Plant {
 
     current(): number {
         // TODO ANIMATION???
-        if(this.infested) {
+        if(this.infested && this.currentStage.infested_frames.length > 0) {
             return this.currentStage.infested_frames[0] ?? 7;
         }
         return this.currentStage.frames[0] ?? 7;

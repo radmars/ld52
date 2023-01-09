@@ -217,9 +217,13 @@ export class TileScreen extends Phaser.Scene {
             spore.image.y += d * spore.dy;
             
             let hit = false;
+            let hitHarvester = false;
 
             const harv = state.harvester.sprite;
-            if(Math.abs(harv.x - spore.image.x)<42 && (Math.abs(harv.y - spore.image.y)<42)) hit = true;
+            if(Math.abs(harv.x - spore.image.x)<42 && (Math.abs(harv.y - spore.image.y)<42)) {
+                hit = true;
+                hitHarvester = true;
+            }
 
             const destintationTile = state.map.getTileAtWorldXY(spore.image.x, spore.image.y, false) as Tilemaps.Tile | null;
             if (destintationTile) {
@@ -242,6 +246,9 @@ export class TileScreen extends Phaser.Scene {
                             console.log("Destroy");
                             spore.image.destroy();
                         });
+                    }
+                    if (hitHarvester) {
+                        console.log("HARV!!!!");
                     }
                 }
             }
@@ -283,7 +290,6 @@ export class TileScreen extends Phaser.Scene {
 
         if (this.game_state) {
             this.timeElapsed += delta;
-            console.log("Time Elapsed: " + this.timeElapsed.toString());
             const state = this.game_state;
             let updated = false;
             for (let y = 0; y < state.tiles.length; y++) {

@@ -28,6 +28,7 @@ interface Spore {
 
 export class TileScreen extends Phaser.Scene {
     private game_state?: GameState;
+    private timeElapsed:number;
 
     constructor() {
         super('TileScreen');
@@ -137,6 +138,7 @@ export class TileScreen extends Phaser.Scene {
         };
 
         this.game_state = game_state;
+        this.timeElapsed = 0;
 
         this.updateTiles();
         this.updateHUD();
@@ -249,7 +251,7 @@ export class TileScreen extends Phaser.Scene {
         const already_infested = tile.object.isInfested();
 
         if (tile.object.grow(delta)) {
-            if(!already_infested && tile.object.canInfest() && tile.object.hasMatured()) {
+            if(!already_infested && tile.object.canInfest() && this.timeElapsed > 10000) {
                 // Randomly pick a tile to infest.
                 if (Math.random() * 100 > 96) {
                     tile.object.infest();
@@ -276,6 +278,8 @@ export class TileScreen extends Phaser.Scene {
         super.update(time, delta);
 
         if (this.game_state) {
+            this.timeElapsed += delta;
+            console.log("Time Elapsed: " + this.timeElapsed.toString());
             const state = this.game_state;
             let updated = false;
             for (let y = 0; y < state.tiles.length; y++) {

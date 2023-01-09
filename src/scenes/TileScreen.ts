@@ -48,6 +48,7 @@ export class TileScreen extends Phaser.Scene {
         this.load.audio('barn', ['assets/audio/barn.m4a', 'assets/audio/barn.ogg']);
         this.load.audio('brake', ['assets/audio/brake.m4a', 'assets/audio/brake.ogg']);
         this.load.audio('harvest', ['assets/audio/harvest.m4a', 'assets/audio/harvest.ogg']);
+        this.load.audio('harvestfail', ['assets/audio/harvestfail.m4a', 'assets/audio/harvestfail.ogg']);
         this.load.audio('infest', ['assets/audio/infest.m4a', 'assets/audio/infest.ogg']);
         this.load.audio('move', ['assets/audio/move.m4a', 'assets/audio/move.ogg']);
         this.load.audio('rotate', ['assets/audio/rotate.m4a', 'assets/audio/rotate.ogg']);
@@ -369,10 +370,11 @@ export class TileScreen extends Phaser.Scene {
             value = harvester.limit - harvester.carrying - value > 0 ? value : harvester.limit - harvester.carrying;
             state.harvester.carrying += value;
             this.flash_text(harvester.sprite.x, harvester.sprite.y, `+${value}`);
-            this.sound.play('harvest');
+            this.sound.play('harvest', { volume: value / 100.0 });
         }
         else {
             this.flash_text(harvester.sprite.x, harvester.sprite.y, `Full! Go unload!`);
+            this.sound.play('harvestfail', { volume: value / 100.0 });
         }
         this.updateHUD();
         this.updateTiles();

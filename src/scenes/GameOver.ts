@@ -9,11 +9,12 @@ export class GameOver extends Phaser.Scene {
     preload(): void {
         console.log("GO2");
         this.load.image('gameover_bg', 'assets/gameover.png');
-        this.load.audio('gameovermusic', ['assets/intro/radmarslogo.m4a', 'assets/intro/radmarslogo.ogg']);
+        this.load.audio('gameovermusic', ['assets/audio/ld52-gameover.m4a', 'assets/audio/ld52-gameover.ogg']);
     }
 
     create(): void {
-        this.sound.play('gameovermusic', { volume: 0.5 });
+        this.sound.stopAll();
+        this.sound.play('gameovermusic', { volume: 0.5, loop: true });
 
         const cx = WINDOW_CENTER.x;
         const cy = WINDOW_CENTER.y;
@@ -27,6 +28,7 @@ export class GameOver extends Phaser.Scene {
         });
 
         this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE as string, () => {
+            this.sound.stopAll();
             this.scene.start('RadmarsScreen');
         });
 

@@ -53,6 +53,7 @@ export class TileScreen extends Phaser.Scene {
         this.load.audio('move', ['assets/audio/move.m4a', 'assets/audio/move.ogg']);
         this.load.audio('rotate', ['assets/audio/rotate.m4a', 'assets/audio/rotate.ogg']);
         this.load.audio('spore', ['assets/audio/spore.m4a', 'assets/audio/spore.ogg']);
+        this.load.audio('music', ['assets/audio/ld52-main.m4a', 'assets/audio/ld52-main.ogg']);
     }
 
     create(): void {
@@ -142,6 +143,9 @@ export class TileScreen extends Phaser.Scene {
         this.input.keyboard.on('keydown-SPACE', () => {
             this.makeSpore(game_state, harvester.sprite.x, harvester.sprite.y, 1, 0);
         });
+
+        const music = this.sound.add('music', { volume: 0.5, loop: true });
+        music.play();
     }
 
     find_barn(tiles: Tile[][]): {x: number, y: number} {
@@ -479,7 +483,7 @@ export class TileScreen extends Phaser.Scene {
                     {
                         delay: 200,
                         callback: () => {
-                            this.sound.play('move');
+                            this.sound.play('move', {volume: 0.5});
                         }
                     });
             }

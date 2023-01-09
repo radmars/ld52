@@ -19,7 +19,7 @@ export interface BarnTile {
 
 export class Barn {
     current(): Frame {
-        return 6;
+        return 900;
     }
 }
 

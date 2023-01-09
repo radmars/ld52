@@ -32,6 +32,7 @@ export class TileScreen extends Phaser.Scene {
 
         this.load.image('ground', 'assets/tiles/ground.png');
         this.load.image('plants', 'assets/tiles/plants.png');
+        this.load.image('barn', 'assets/barn.png');
         this.load.image('harvester', 'assets/harvester.png');
     }
 
@@ -60,6 +61,8 @@ export class TileScreen extends Phaser.Scene {
 
         const barnPosition = this.find_barn(tiles);
         const harvester = make_harvester(map, barnPosition.x, barnPosition.y, this.add);
+
+        this.add.image(barnPosition.x * TILE_SIZE + TILE_SIZE / 2, barnPosition.y * TILE_SIZE, "barn");
 
         // TODO: Set Deadzone for harvester?
         this.cameras.main.setBounds(0, 0, TILE_SIZE * map.width, TILE_SIZE * map.height);

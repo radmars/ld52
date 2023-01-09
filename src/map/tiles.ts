@@ -160,10 +160,11 @@ export class Plant {
     }
 
     harvest(): number {
+        const infested = this.infested;
         const value = this.currentStage.value;
         this.setStage(0);
         this.infested = false;
-        return value;
+        return infested ? value : 0;
     }
 
     clone(): Plant {

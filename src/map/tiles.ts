@@ -77,7 +77,7 @@ export class Plant {
     private currentStage: PlantStage;
     private timer: number;
     private infested: boolean;
-    private hasMaturedOnce: boolean;
+    private maturationCycles: number;
 
     constructor({ stages }: PlantParams) {
         const currentStage = stages[0];
@@ -92,8 +92,8 @@ export class Plant {
         this.currentStage = currentStage;
         this.timer = 0;
 
-        this.hasMaturedOnce = false;
-        this.setStage(Math.floor(Math.random()*4));
+        this.maturationCycles = 0;
+        this.setStage(Math.floor(Math.random()*5));
 
     }
 
@@ -113,7 +113,7 @@ export class Plant {
     }
 
     hasMatured(): boolean {
-        return this.hasMaturedOnce;
+        return this.maturationCycles > 1;
     }
 
     /*
@@ -154,8 +154,7 @@ export class Plant {
             if (this.timer <= 0) {
                 this.setStage(this.currentIndex + 1);
                 if(this.currentStage.infested_frames.length > 0) {
-                    console.log(`Matured`);
-                    this.hasMaturedOnce = true;
+                    this.maturationCycles ++;
                 }
                 return true;
             }

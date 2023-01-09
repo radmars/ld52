@@ -357,9 +357,7 @@ export class TileScreen extends Phaser.Scene {
 
             if (updated) {
                 this.updateTiles();
-
-                if(this.game_state.healthy_tiles == 0) {
-                    console.log("GO");
+                if (state.harvester.health == 0) {
                     this.scene.start('GameOver');
                 }
             }

@@ -98,30 +98,32 @@ const map_tiles: TileDefinitions = {
 
     // fence segments
     p: (): Tile => new_impassible_tile(7),
-    d: (): Tile => new_impassible_tile(7),
-    b: (): Tile => new_impassible_tile(7),
+    d: (): Tile => new_impassible_tile(12),
+    b: (): Tile => new_impassible_tile(14),
     q: (): Tile => new_impassible_tile(7),
-    '-': (): Tile => new_impassible_tile(7),
-    '|': (): Tile => new_impassible_tile(7),
+    '-': (): Tile => new_impassible_tile(9),
+    '|': (): Tile => new_impassible_tile(11),
+    '=': (): Tile => new_impassible_tile(13),
+    '/': (): Tile => new_impassible_tile(15),
 };
 
 export function build(): Tile[][] {
     let map = `
         iiiiiiiiiiiiii
         p-----iBi----q
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        |gggggggggggg|
-        b------------d
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        /gggggggggggg|
+        b============d
     `;
     map = map.replaceAll(/^\s*\n/gm, '')
         .replaceAll(/^\s*$/gm, '');

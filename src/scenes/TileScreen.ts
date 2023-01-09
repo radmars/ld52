@@ -18,6 +18,13 @@ interface GameState {
 
     healthy_text: GameObjects.Text;
     healthy_tiles: number;
+    spores: Spore[];
+}
+
+interface Spore {
+    image: GameObjects.Sprite,
+    dx: number;
+    dy: number;
 }
 
 export class TileScreen extends Phaser.Scene {
@@ -33,10 +40,19 @@ export class TileScreen extends Phaser.Scene {
         this.load.image('ground', 'assets/tiles/ground.png');
         this.load.image('plants', 'assets/tiles/plants.png');
         this.load.image('barn', 'assets/barn.png');
+        this.load.spritesheet('spore', 'assets/spore.png', {
+            frameWidth: 24,
+            frameHeight: 24,
+        });
         this.load.image('harvester', 'assets/harvester.png');
     }
 
     create(): void {
+        this.anims.create({
+            key: "explode",
+            frameRate: 7,
+            frames: this.anims.generateFrameNumbers("spore", { start: 0, end: 2 }),
+        });
         const tiles = build();
         const first_row = tiles[0];
         if (!first_row) {
@@ -108,12 +124,17 @@ export class TileScreen extends Phaser.Scene {
 
             healthy_tiles: this.get_healthy_tiles(tiles),
             healthy_text,
+            spores: [],
         };
 
         this.game_state = game_state;
 
         this.updateTiles();
         this.updateHUD();
+
+        this.input.keyboard.on('keydown-SPACE', () => {
+            this.makeSpore(game_state, harvester.sprite.x, harvester.sprite.y, 1, 0);
+        });
     }
 
     find_barn(tiles: Tile[][]): {x: number, y: number} {
@@ -165,18 +186,75 @@ export class TileScreen extends Phaser.Scene {
         }
     }
 
-    tryInfest(state: GameState, x: number, y: number): void {
-        if(y > 0 && y < state.tiles.length) {
-            const row = state.tiles[y];
-            if(row) {
-                if(x > 0 && x < row.length) {
-                    const tile = row[x];
-                    if(tile && tile.type == 'plant') {
-                        tile.object.infest();
+    makeSpore(state: GameState, x: number, y: number, dx: number, dy: number): void {
+        const image = this.add.sprite(x, y, "spore", 0);
+        state.spores.push({
+            image,
+            dx: dx * 0.1,
+            dy: dy * 0.1,
+        });
+    }
+
+    updateSpores(state: GameState, d: number): boolean {
+        let updated = false;
+
+        for (const spore of state.spores) {
+            spore.image.x += d * spore.dx;
+            spore.image.y += d * spore.dy;
+
+            const destintationTile = state.map.getTileAtWorldXY(spore.image.x, spore.image.y, false) as Tilemaps.Tile | null;
+            if (destintationTile) {
+                const destinationType = state.tiles[destintationTile.y]?.[destintationTile.x];
+                if (destinationType) {
+                    let hit= false;
+                    if (destinationType.type == "plant" && destinationType.object.canInfest() && !destinationType.object.isInfested()) {
+                        destinationType.object.infest();
+                        updated = true;
+                        hit = true;
+                    }
+                    else if (destinationType.type != 'plant') {
+                        hit = true;
+                    }
+
+                    if(hit) {
+                        state.spores = state.spores.filter(other => other != spore);
+                        spore.image.play("explode");
+                        spore.image.once(Phaser.Animations.Events.ANIMATION_COMPLETE as string, () => {
+                            console.log("Destroy");
+                            spore.image.destroy();
+                        });
                     }
                 }
             }
         }
+ 
+        return updated;
+    }
+
+    updatePlantTile(state: GameState, delta: number, x: number, y: number, tile: PlantTile): boolean {
+        let updated = false;
+        const already_infested = tile.object.isInfested();
+
+        if (tile.object.grow(delta)) {
+            if(!already_infested && tile.object.canInfest()) {
+                // Randomly pick a tile to infest.
+                if (Math.random() * 150 > 149) {
+                    tile.object.infest();
+                }
+            }
+
+            if (already_infested && tile.object.isLastStage()) {
+                this.makeSpore(state, x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 1, 0);
+                this.makeSpore(state, x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, -1, 0);
+                this.makeSpore(state, x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 0, 1);
+                this.makeSpore(state, x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 0, -1);
+            }
+
+            updated = true;
+        }
+
+
+        return updated;
     }
 
     override update(time: number, delta: number): void {
@@ -190,42 +268,17 @@ export class TileScreen extends Phaser.Scene {
                 if(row) {
                     for (let x = 0; x < row.length; x++) {
                         const tile = row[x];
-                        if(tile) {
-                            if (tile.type == 'plant') {
-                                const already_infested = tile.object.isInfested();
-
-                                if (tile.object.grow(delta)) {
-                                    if(!already_infested && tile.object.isLastStage()) {
-                                        if (Math.random() * 100 > 98) {
-                                            tile.object.infest();
-                                        }
-                                    }
-
-                                    updated = true;
-                                }
-
-                                if (already_infested && tile.object.isLastStage()) {
-                                    if(Math.random() > .99) {
-                                        updated = true;
-                                        this.tryInfest(state, x - 1, y);
-                                    }
-                                    if(Math.random() > .99) {
-                                        updated = true;
-                                        this.tryInfest(state, x + 1, y);
-                                    }
-                                    if(Math.random() > .99) {
-                                        updated = true;
-                                        this.tryInfest(state, x, y - 1);
-                                    }
-                                    if(Math.random() > .99) {
-                                        updated = true;
-                                        this.tryInfest(state, x, y + 1);
-                                    }
-                                }
+                        if(tile &&tile.type == 'plant') {
+                            if(this.updatePlantTile(state, delta, x, y, tile)) {
+                                updated = true;
                             }
                         }
                     }
                 }
+            }
+
+            if(this.updateSpores(state, delta)) {
+                updated = true;
             }
 
             if(!state.harvester.current_motion) {

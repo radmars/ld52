@@ -142,13 +142,7 @@ export class Plant {
         if (!this.currentStage.terminal_stage) {
             this.timer -= dt;
             if (this.timer <= 0) {
-                const newStage = this.setStage(this.currentIndex + 1);
-
-                if(newStage.terminal_stage) {
-                    if(Math.random() * 100 > 98) {
-                        this.infest();
-                    }
-                }
+                this.setStage(this.currentIndex + 1);
                 return true;
             }
         }
@@ -168,6 +162,7 @@ export class Plant {
     harvest(): number {
         const value = this.currentStage.value;
         this.setStage(0);
+        this.infested = false;
         return value;
     }
 

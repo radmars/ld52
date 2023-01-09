@@ -164,7 +164,7 @@ export class Plant {
         const value = this.currentStage.value;
         this.setStage(0);
         this.infested = false;
-        return infested ? value : 0;
+        return infested ? 0 : value;
     }
 
     clone(): Plant {

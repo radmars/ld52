@@ -5,6 +5,8 @@ export interface Harvester {
     sprite: Phaser.GameObjects.Image;
     tile: Tilemaps.Tile,
     current_motion: Tweens.Tween | null;
+    limit: number;
+    carrying: number;
 }
 
 // TILE POSITION
@@ -18,6 +20,8 @@ export function make_harvester(map: Tilemaps.Tilemap, x: number, y: number, add:
         sprite,
         tile,
         current_motion: null,
+        limit: 1000,
+        carrying: 0,
     };
 }
 

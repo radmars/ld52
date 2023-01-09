@@ -8,7 +8,6 @@ interface GameState {
     map: Tilemaps.Tilemap;
     harvester: Harvester,
     hauling_text: GameObjects.Text;
-    hauling: number;
     sold: number;
     sold_text: GameObjects.Text;
     up_key: Phaser.Input.Keyboard.Key,
@@ -114,7 +113,6 @@ export class TileScreen extends Phaser.Scene {
             hauling_text,
             map,
             tiles,
-            hauling: 0,
             sold: 0,
             sold_text,
             up_key: this.input.keyboard.addKey('UP'),
@@ -166,7 +164,7 @@ export class TileScreen extends Phaser.Scene {
 
     updateHUD(): void {
         if (this.game_state) {
-            this.game_state.hauling_text.setText(`Hauling ${this.game_state.hauling} tons of meat`);
+            this.game_state.hauling_text.setText(`Harvester carrying ${this.game_state.harvester.carrying} of ${this.game_state.harvester.limit} tons of meat`);
             this.game_state.sold_text.setText(`Sold ${this.game_state.sold} tons of meat`);
             this.game_state.healthy_text.setText(`${this.game_state.healthy_tiles} healthy plants remain`);
         }
@@ -355,18 +353,24 @@ export class TileScreen extends Phaser.Scene {
 
     onTouchPlant(state: GameState, tile: PlantTile): void {
         const harvester = state.harvester;
-        const value = tile.object.harvest();
-        state.hauling += value;
+        let value = tile.object.harvest();
+        if(harvester.carrying < harvester.limit) {
+            value = harvester.limit - harvester.carrying - value > 0 ? value : harvester.limit - harvester.carrying;
+            state.harvester.carrying += value;
+            this.flash_text(harvester.sprite.x, harvester.sprite.y, `+${value}`);
+        }
+        else {
+            this.flash_text(harvester.sprite.x, harvester.sprite.y, `Full! Go unload!`);
+        }
         this.updateHUD();
         this.updateTiles();
-        this.flash_text(harvester.sprite.x, harvester.sprite.y, `+${value}`);
         this.cameras.main.shake(undefined, 0.005);
     }
 
     onTouchBarn(state: GameState): void {
-        const hauling = state.hauling;
+        const hauling = state.harvester.carrying;
         state.sold += hauling;
-        state.hauling = 0;
+        state.harvester.carrying = 0;
         this.flash_text(
             state.harvester.sprite.x,
             state.harvester.sprite.y,

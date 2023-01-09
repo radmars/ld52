@@ -3,13 +3,12 @@ export const TILE_SIZE = 96;
 export type Frame = number;
 
 export interface PlantStage {
+    infested_frames: Frame[],
     frames: Frame[],
     animation_time: number;
     stage_duration: number;
     value: number;
-    flashing: boolean;
     terminal_stage: boolean;
-    infested: boolean;
 }
 
 export interface BarnTile {
@@ -77,6 +76,7 @@ export class Plant {
     private currentIndex: number;
     private currentStage: PlantStage;
     private timer: number;
+    private infested: boolean;
 
     constructor({ stages }: PlantParams) {
         const currentStage = stages[0];
@@ -85,10 +85,25 @@ export class Plant {
             throw new Error("Must have at least one frame indexed");
         }
 
+        this.infested = false;
         this.stages = stages;
         this.currentIndex = 0;
         this.currentStage = currentStage;
         this.timer = 0;
+    }
+
+    canInfest(): boolean {
+        return this.currentStage.infested_frames.length > 0;
+    }
+
+    infest(): void {
+        if(this.canInfest()) {
+            this.infested = true;
+        }
+    }
+
+    isInfested(): boolean {
+        return this.infested;
     }
 
     /*
@@ -98,8 +113,16 @@ export class Plant {
     }
     */
 
+    isLastStage(): boolean {
+        return this.currentStage.terminal_stage;
+    }
+
     current(): number {
-        return this.currentStage.frames[0] ?? 12;
+        // TODO ANIMATION???
+        if(this.infested) {
+            return this.currentStage.infested_frames[0] ?? 7;
+        }
+        return this.currentStage.frames[0] ?? 7;
     }
 
     /*
@@ -109,7 +132,7 @@ export class Plant {
     */
 
     healthy(): boolean {
-        return !this.currentStage.infested;
+        return !this.infested;
     }
 
     /**
@@ -119,20 +142,27 @@ export class Plant {
         if (!this.currentStage.terminal_stage) {
             this.timer -= dt;
             if (this.timer <= 0) {
-                this.setStage(this.currentIndex + 1);
+                const newStage = this.setStage(this.currentIndex + 1);
+
+                if(newStage.terminal_stage) {
+                    if(Math.random() * 100 > 98) {
+                        this.infest();
+                    }
+                }
                 return true;
             }
         }
         return false;
     }
 
-    setStage(idx: number): void {
+    setStage(idx: number): PlantStage {
         this.currentIndex = idx;
         const currentFrame = this.stages[this.currentIndex];
         if(currentFrame != undefined) {
             this.currentStage = currentFrame;
             this.timer = this.currentStage.stage_duration;
         }
+        return this.currentStage;
     }
 
     harvest(): number {

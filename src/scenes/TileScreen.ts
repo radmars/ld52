@@ -165,17 +165,64 @@ export class TileScreen extends Phaser.Scene {
         }
     }
 
+    tryInfest(state: GameState, x: number, y: number): void {
+        if(y > 0 && y < state.tiles.length) {
+            const row = state.tiles[y];
+            if(row) {
+                if(x > 0 && x < row.length) {
+                    const tile = row[x];
+                    if(tile && tile.type == 'plant') {
+                        tile.object.infest();
+                    }
+                }
+            }
+        }
+    }
+
     override update(time: number, delta: number): void {
         super.update(time, delta);
 
         if (this.game_state) {
             const state = this.game_state;
             let updated = false;
-            for (const row of this.game_state.tiles) {
-                for (const tile of row) {
-                    if (tile.type == 'plant') {
-                        if (tile.object.grow(delta)) {
-                            updated = true;
+            for (let y = 0; y < state.tiles.length; y++) {
+                const row = state.tiles[y];
+                if(row) {
+                    for (let x = 0; x < row.length; x++) {
+                        const tile = row[x];
+                        if(tile) {
+                            if (tile.type == 'plant') {
+                                const already_infested = tile.object.isInfested();
+
+                                if (tile.object.grow(delta)) {
+                                    if(!already_infested && tile.object.isLastStage()) {
+                                        if (Math.random() * 100 > 98) {
+                                            tile.object.infest();
+                                        }
+                                    }
+
+                                    updated = true;
+                                }
+
+                                if (already_infested && tile.object.isLastStage()) {
+                                    if(Math.random() > .99) {
+                                        updated = true;
+                                        this.tryInfest(state, x - 1, y);
+                                    }
+                                    if(Math.random() > .99) {
+                                        updated = true;
+                                        this.tryInfest(state, x + 1, y);
+                                    }
+                                    if(Math.random() > .99) {
+                                        updated = true;
+                                        this.tryInfest(state, x, y - 1);
+                                    }
+                                    if(Math.random() > .99) {
+                                        updated = true;
+                                        this.tryInfest(state, x, y + 1);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

@@ -3,70 +3,54 @@ import { new_plant_tile, new_barn_tile, Barn, Plant, Tile, PlantStage, new_impas
 const meat_stages: PlantStage[] = [ 
     {
         frames: [0],
-        flashing: false,
+        infested_frames: [],
         animation_time: 100,
         stage_duration: 1000,
         terminal_stage: false,
-        infested: false,
         value: 1,
     },
     {
         frames: [1],
-        flashing: false,
+        infested_frames: [],
         animation_time: 100,
         stage_duration: 1000,
         terminal_stage: false,
-        infested: false,
         value: 2,
     },
     {
         frames: [2],
-        flashing: false,
+        infested_frames: [],
         animation_time: 100,
         stage_duration: 1000,
         terminal_stage: false,
-        infested: false,
         value: 5,
     },
     {
         frames: [3],
-        flashing: false,
+        infested_frames: [16],
         animation_time: 100,
         stage_duration: 1000,
         terminal_stage: false,
-        infested: false,
         value: 10,
     },
     // the good shit
     {
         frames: [4],
-        flashing: false,
+        infested_frames: [17],
         animation_time: 100,
         stage_duration: 5000,
         terminal_stage: false,
-        infested: false,
         value: 100,
     },
     // expired
     {
         frames: [5],
-        flashing: false,
+        infested_frames: [18],
         animation_time: 100,
         // doesn't matter...
         stage_duration: 0,
         terminal_stage: true,
-        infested: false,
         value: 0,
-    },
-    // infested
-    {
-        frames: [8],
-        flashing: false,
-        animation_time: 100,
-        stage_duration: 1000,
-        terminal_stage: false,
-        infested: true,
-        value: 1,
     }
 ];
 
